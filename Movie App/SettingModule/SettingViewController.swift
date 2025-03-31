@@ -1,4 +1,16 @@
+//
+//  SettingViewController.swift
+//  Movie App
+//
+//  Created by Екатерина Орлова on 31.03.2025.
+//
+
 import UIKit
+
+protocol SettingViewProtocol: AnyObject {
+    
+}
+
 final class SettingViewController: UIViewController {
     //MARK: - Properties
     private let presenter: SettingPresenterProtocol
@@ -162,5 +174,18 @@ final class SettingViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+    init(presenter: SettingPresenterProtocol) {
+        self.presenter = presenter
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable, message: "unavailable")
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+// MARK: - SettingViewProtocol
+extension SettingViewController: SettingViewProtocol {
+    
+}
     }
     
