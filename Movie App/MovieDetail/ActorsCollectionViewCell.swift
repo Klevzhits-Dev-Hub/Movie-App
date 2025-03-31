@@ -10,9 +10,40 @@ import UIKit
 class ActorsCollectionViewCell: UICollectionViewCell {
     static let identifier = "ActorsCollectionViewCell"
     
-    private lazy var label: UILabel = {
+    private lazy var actorsStackView: UIStackView = {
+        let element = UIStackView()
+        element.axis = .horizontal
+        element.spacing = 8
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var actorImageView: UIImageView = {
+        let element = UIImageView()
+        element.image = UIImage(named: "MockActor")
+        element.contentMode = .scaleAspectFill
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var actorInfoStackView: UIStackView = {
+        let element = UIStackView()
+        element.axis = .vertical
+        element.distribution = .fillEqually
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var actorNameLabel: UILabel = {
         let element = UILabel()
-        element.text = "Actors"
+        element.text = "Actor Name"
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var actorRoleLabel: UILabel = {
+        let element = UILabel()
+        element.text = "Actor Role"
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -30,13 +61,18 @@ class ActorsCollectionViewCell: UICollectionViewCell {
     
     
     func setupViews() {
-        addSubview(label)
+        addSubview(actorsStackView)
+        
+        actorsStackView.addArrangedSubview(actorImageView)
+        actorsStackView.addArrangedSubview(actorInfoStackView)
+        
+        actorInfoStackView.addArrangedSubview(actorNameLabel)
+        actorInfoStackView.addArrangedSubview(actorRoleLabel)
     }
     
     func setupConstraints() {
         NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: centerYAnchor),
+            
         ])
     }
 }
