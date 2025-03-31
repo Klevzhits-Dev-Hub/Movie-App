@@ -25,9 +25,9 @@ final class MovieDetailView: UIView {
     
     private lazy var movieImageView: UIImageView = {
         let element = UIImageView()
-        element.image = UIImage(named: "MockImage")
+        element.image = UIImage(named: "Image")
         element.contentMode = .scaleAspectFit
-        element.clipsToBounds = true
+        element.layer.cornerRadius = 16
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -120,7 +120,7 @@ final class MovieDetailView: UIView {
     
     private lazy var actorStackView: UIStackView = {
         let element = UIStackView()
-        element.axis = .horizontal
+        element.axis = .vertical
         element.spacing = 16
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
@@ -133,6 +133,24 @@ final class MovieDetailView: UIView {
         return element
     }()
 #warning("collection view?")
+    
+    private lazy var actorCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.minimumLineSpacing = 20
+        layout.itemSize = CGSize(width: 150, height: 41)
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.backgroundColor = .clear
+        collectionView.dataSource = self
+        collectionView.register(
+            ActorsCollectionViewCell.self,
+            forCellWithReuseIdentifier: ActorsCollectionViewCell.identifier
+        )
+        return collectionView
+    }()
     
     private lazy var watchNowButton: UIButton = {
         let element = UIButton(type: .system)
@@ -153,8 +171,29 @@ final class MovieDetailView: UIView {
     }
 }
 
+// MARK: - UICollectionViewDataSource
+extension MovieDetailView: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        3
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = actorCollectionView.dequeueReusableCell(
+            withReuseIdentifier: ActorsCollectionViewCell.identifier,
+            for: indexPath
+        ) as? ActorsCollectionViewCell else {
+            return UICollectionViewCell()
+        }
+        
+        return cell
+    }
+    
+    
+}
+
 // MARK: - Set Views and Setup Constraints
 private extension MovieDetailView {
+    
     func setupViews() {
         addSubview(scrollView)
         scrollView.addSubview(contentView)
@@ -179,53 +218,57 @@ private extension MovieDetailView {
         movieSummaryStackView.addArrangedSubview(movieDescrLabel)
         
         actorStackView.addArrangedSubview(actorLabel)
+        actorStackView.addArrangedSubview(actorCollectionView)
     }
     
     func setupConstraints() {
-        NSLayoutConstraint.activate(
-            [
-                scrollView.topAnchor.constraint(equalTo: topAnchor),
-                scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
-                scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
-                scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
-                
-                contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-                contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-                contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-                contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-                contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-                
-                movieImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
-                movieImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-                movieImageView.heightAnchor.constraint(equalToConstant: 300),
-                movieImageView.widthAnchor.constraint(equalToConstant: 224),
-                
-                movieDetailStackView.topAnchor.constraint(equalTo: movieImageView.bottomAnchor, constant: 24),
-                movieDetailStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 42),
-                movieDetailStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -42),
-                
-                view1.heightAnchor.constraint(equalToConstant: 19),
-                view2.heightAnchor.constraint(equalToConstant: 19),
-                view3.heightAnchor.constraint(equalToConstant: 19),
-                ratingContainerView.heightAnchor.constraint(equalToConstant: 40),
-                ratingView.centerXAnchor.constraint(equalTo: ratingContainerView.centerXAnchor),
-                ratingView.heightAnchor.constraint(equalToConstant: 19),
-                ratingView.widthAnchor.constraint(equalToConstant: 104),
-                
-                movieSummaryStackView.topAnchor.constraint(equalTo: movieDetailStackView.bottomAnchor, constant: 32),
-                movieSummaryStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 42),
-                movieSummaryStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -42),
-                
-                actorStackView.topAnchor.constraint(equalTo: movieSummaryStackView.bottomAnchor, constant: 24),
-                actorStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 42),
-                actorStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -42),
-                
-                watchNowButton.topAnchor.constraint( equalTo: actorStackView.bottomAnchor, constant: 24),
-                watchNowButton.centerXAnchor.constraint(equalTo: centerXAnchor),
-                watchNowButton.widthAnchor.constraint(equalToConstant: 181),
-                watchNowButton.heightAnchor.constraint(equalToConstant: 56),
-                watchNowButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -22),
-            ]
-        )
+        NSLayoutConstraint.activate([
+            
+            scrollView.topAnchor.constraint(equalTo: topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            
+            movieImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            movieImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            movieImageView.heightAnchor.constraint(equalToConstant: 300),
+            movieImageView.widthAnchor.constraint(equalToConstant: 224),
+            
+            movieDetailStackView.topAnchor.constraint(equalTo: movieImageView.bottomAnchor, constant: 24),
+            movieDetailStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 42),
+            movieDetailStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -42),
+            
+            view1.heightAnchor.constraint(equalToConstant: 19),
+            view2.heightAnchor.constraint(equalToConstant: 19),
+            view3.heightAnchor.constraint(equalToConstant: 19),
+            ratingContainerView.heightAnchor.constraint(equalToConstant: 40),
+            ratingView.centerXAnchor.constraint(equalTo: ratingContainerView.centerXAnchor),
+            ratingView.heightAnchor.constraint(equalToConstant: 19),
+            ratingView.widthAnchor.constraint(equalToConstant: 104),
+            
+            movieSummaryStackView.topAnchor.constraint(equalTo: movieDetailStackView.bottomAnchor, constant: 32),
+            movieSummaryStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 42),
+            movieSummaryStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -42),
+            
+            actorStackView.topAnchor.constraint(equalTo: movieSummaryStackView.bottomAnchor, constant: 24),
+            actorStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 42),
+            actorStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -42),
+            
+            actorCollectionView.heightAnchor.constraint(equalToConstant: 41),
+            
+            watchNowButton.topAnchor.constraint( equalTo: actorStackView.bottomAnchor, constant: 24),
+            watchNowButton.centerXAnchor.constraint(equalTo: centerXAnchor),
+            watchNowButton.widthAnchor.constraint(equalToConstant: 181),
+            watchNowButton.heightAnchor.constraint(equalToConstant: 56),
+            watchNowButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -22),
+        ])
     }
 }
+
+
