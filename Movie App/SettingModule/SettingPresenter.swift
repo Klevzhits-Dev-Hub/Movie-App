@@ -9,6 +9,10 @@
 import UIKit
 
 protocol SettingPresenterProtocol {
+    func nextButtonTapped()
+    func changePasswordButtonTapped()
+    func forgotPasswordButtonTapped()
+    func darkModeButtonTapped()
 }
 
 final class SettingPresenter{

@@ -174,6 +174,10 @@ final class SettingViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupView()
+        setupConstraints()
+    }
+    
     init(presenter: SettingPresenterProtocol) {
         self.presenter = presenter
         super.init(nibName: nil, bundle: nil)
@@ -183,9 +187,91 @@ final class SettingViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+}
+
 // MARK: - SettingViewProtocol
 extension SettingViewController: SettingViewProtocol {
     
 }
+// MARK: - setup View and Constraints
+private extension SettingViewController {
+    func setupView() {
+        view.backgroundColor = .systemBackground
+        view.addSubview(profileImageView)
+        
+        view.addSubview(profileStackView)
+        profileStackView.addArrangedSubview(profileNameLabel)
+        profileStackView.addArrangedSubview(nickNameLabel)
+        
+        view.addSubview(personalInfoLabel)
+        view.addSubview(profileButton)
+        view.addSubview(nextButton)
+        view.addSubview(securityInfoLabel)
+        view.addSubview(changePasswordButton)
+        view.addSubview(forgotPasswordButton)
+        view.addSubview(darkModeButton)
+        view.addSubview(darkModeLabel)
+        view.addSubview(customSwitch)
+        view.addSubview(logOutButton)
     }
     
+    func setupConstraints() {
+        NSLayoutConstraint.activate([
+            profileImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            profileImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 124),
+            profileImageView.widthAnchor.constraint(equalToConstant: 56),
+            profileImageView.heightAnchor.constraint(equalToConstant: 56),
+            
+            profileStackView.leadingAnchor.constraint(equalTo: profileImageView.trailingAnchor, constant: 32),
+            profileStackView.topAnchor.constraint(equalTo: view.topAnchor, constant: 134),
+            profileStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 60),
+            
+            personalInfoLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            personalInfoLabel.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 32),
+            personalInfoLabel.heightAnchor.constraint(equalToConstant: 20),
+            
+            profileButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            profileButton.topAnchor.constraint(equalTo: personalInfoLabel.bottomAnchor, constant: 16),
+            profileButton.widthAnchor.constraint(equalToConstant: 327),
+            profileButton.heightAnchor.constraint(equalToConstant: 24),
+            
+            nextButton.centerYAnchor.constraint(equalTo: profileButton.centerYAnchor),
+            nextButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -22),
+            nextButton.widthAnchor.constraint(equalToConstant: 24),
+            nextButton.heightAnchor.constraint(equalToConstant: 24),
+            
+            securityInfoLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            securityInfoLabel.topAnchor.constraint(equalTo: profileButton.bottomAnchor, constant: 24),
+            securityInfoLabel.heightAnchor.constraint(equalToConstant: 20),
+            
+            changePasswordButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            changePasswordButton.topAnchor.constraint(equalTo: securityInfoLabel.bottomAnchor, constant: 16),
+            changePasswordButton.widthAnchor.constraint(equalToConstant: 327),
+            changePasswordButton.heightAnchor.constraint(equalToConstant: 24),
+            
+            forgotPasswordButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            forgotPasswordButton.topAnchor.constraint(equalTo: changePasswordButton.bottomAnchor, constant: 32),
+            forgotPasswordButton.widthAnchor.constraint(equalToConstant: 327),
+            forgotPasswordButton.heightAnchor.constraint(equalToConstant: 24),
+            
+            darkModeButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            darkModeButton.topAnchor.constraint(equalTo: forgotPasswordButton.bottomAnchor, constant: 32),
+            darkModeButton.widthAnchor.constraint(equalToConstant: 24),
+            darkModeButton.heightAnchor.constraint(equalToConstant: 24),
+            
+            darkModeLabel.leadingAnchor.constraint(equalTo: darkModeButton.trailingAnchor, constant: 12),
+            darkModeLabel.centerYAnchor.constraint(equalTo: darkModeButton.centerYAnchor),
+            darkModeLabel.heightAnchor.constraint(equalToConstant: 24),
+            
+            customSwitch.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -30),
+            customSwitch.centerYAnchor.constraint(equalTo: darkModeButton.centerYAnchor),
+            customSwitch.widthAnchor.constraint(equalToConstant: 44),
+            customSwitch.heightAnchor.constraint(equalToConstant: 24),
+            
+            logOutButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            logOutButton.topAnchor.constraint(equalTo: darkModeLabel.bottomAnchor, constant: 200),
+            logOutButton.widthAnchor.constraint(equalToConstant: 327),
+            logOutButton.heightAnchor.constraint(equalToConstant: 60)
+        ])
+    }
+}
