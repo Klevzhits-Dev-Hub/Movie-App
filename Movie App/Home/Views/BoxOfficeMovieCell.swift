@@ -9,6 +9,8 @@ import UIKit
 
 class BoxOfficeMovieCell: UICollectionViewCell {
     
+    let identifier = "BoxOfficeMovieCell"
+    
     let movieImageView: UIImageView = {
         let iv = UIImageView()
         iv.image = UIImage(named: "movieMock")

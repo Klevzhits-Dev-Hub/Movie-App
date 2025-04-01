@@ -27,7 +27,6 @@ class CarouselViewController: UIViewController, UICollectionViewDelegate, UIColl
         collectionView?.showsHorizontalScrollIndicator = false
         collectionView?.delegate = self
         collectionView?.dataSource = self
-        //collectionView?.isPagingEnabled = true
         
         guard let myCollection = collectionView else { return }
         view.addSubview(myCollection)
@@ -65,56 +64,48 @@ class CarouselViewController: UIViewController, UICollectionViewDelegate, UIColl
     
     // Применяем трансформацию ко всем ячейкам
     func applyCellTransformations() {
-        let centerX = collectionView!.contentOffset.x + (collectionView!.frame.width / 2)  // Центр экрана
+        let centerX = collectionView!.contentOffset.x + (collectionView!.frame.width / 2)
 
         let maxRotationAngle: CGFloat = 10.0 // Максимальный угол поворота в градусах
-        let maxScale: CGFloat = 1.0  // Центр - нормальный размер
-        let minScale: CGFloat = 0.75  // Смещение - уменьшение
+        let maxScale: CGFloat = 1.0
+        let minScale: CGFloat = 0.75  // Уменьшение
 
         for cell in collectionView!.visibleCells {
             guard let indexPath = collectionView!.indexPath(for: cell),
                   let attributes = collectionView!.layoutAttributesForItem(at: indexPath) else { continue }
 
-            let distanceFromCenter = centerX - attributes.frame.midX  // Расстояние от центра ячейки до центра экрана
-            let normalizedDistance = distanceFromCenter / collectionView!.frame.width  // Нормализуем расстояние
+            let distanceFromCenter = centerX - attributes.frame.midX
+            let normalizedDistance = distanceFromCenter / collectionView!.frame.width
 
-            // Вычисляем угол для поворота
-            let rotationAngle = -normalizedDistance * maxRotationAngle // Угол наклона в градусах (инвертировано)
-
-            // Вычисляем масштаб (чем дальше от центра, тем меньше масштаб)
+            let rotationAngle = -normalizedDistance * maxRotationAngle
             let scale = abs(normalizedDistance) < 0.27 ? maxScale : minScale
 
-            // Применяем трансформацию для масштабирования и поворота
             cell.transform = CGAffineTransform(scaleX: scale, y: scale)
-                .rotated(by: rotationAngle * .pi / 180)  // Поворот в радианах
+                .rotated(by: rotationAngle * .pi / 180)
         }
     }
     
-    // Обработка скроллинга
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let centerX = scrollView.contentOffset.x + (scrollView.frame.width / 2)  // Центр экрана
+        let centerX = scrollView.contentOffset.x + (scrollView.frame.width / 2)
 
         let maxRotationAngle: CGFloat = 10.0 // Максимальный угол поворота в градусах
-        let maxScale: CGFloat = 1.0  // Центр - нормальный размер
-        let minScale: CGFloat = 0.75  // Смещение - уменьшение
+        let maxScale: CGFloat = 1.0
+        let minScale: CGFloat = 0.75  // Уменьшение
 
         for cell in collectionView!.visibleCells {
             guard let indexPath = collectionView!.indexPath(for: cell),
                   let attributes = collectionView!.layoutAttributesForItem(at: indexPath) else { continue }
 
-            let distanceFromCenter = centerX - attributes.frame.midX  // Расстояние от центра ячейки до центра экрана
-            let normalizedDistance = distanceFromCenter / scrollView.frame.width  // Нормализуем расстояние
+            let distanceFromCenter = centerX - attributes.frame.midX
+            let normalizedDistance = distanceFromCenter / scrollView.frame.width
 
-            // Вычисляем угол для поворота
-            let rotationAngle = -normalizedDistance * maxRotationAngle // Угол наклона в градусах (инвертировано)
+            let rotationAngle = -normalizedDistance * maxRotationAngle
 
-            // Вычисляем масштаб (чем дальше от центра, тем меньше масштаб)
             let scale = abs(normalizedDistance) > 0.30 ? minScale : maxScale
 
-            // Применяем трансформацию для масштабирования и поворота
             UIView.animate(withDuration: 0.3) {
                 cell.transform = CGAffineTransform(scaleX: scale, y: scale)
-                    .rotated(by: rotationAngle * .pi / 180)  // Поворот в радианах
+                    .rotated(by: rotationAngle * .pi / 180)
             }
         }
     }

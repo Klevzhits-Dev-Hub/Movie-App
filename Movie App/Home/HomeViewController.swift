@@ -17,10 +17,14 @@ final class HomeViewController: UICollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: cellId)
+        collectionView.register(CarouselHeaderView.self,
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                                withReuseIdentifier: CarouselHeaderView.reuseIdentifier)
         collectionView.register(CategoryCell.self, forCellWithReuseIdentifier: categoryCell)
         collectionView.register(BoxOfficeMovieCell.self, forCellWithReuseIdentifier: movieCell)
         collectionView.register(CategoryHeaderView.self, forSupplementaryViewOfKind: HomeViewController.categoryHeaderId, withReuseIdentifier: headerId)
         collectionView.register(BoxOfficeHeaderView.self, forSupplementaryViewOfKind: HomeViewController.boxOfficeHeaderId, withReuseIdentifier: boxOfficeId)
+        
     }
         
     init() {
@@ -48,6 +52,11 @@ final class HomeViewController: UICollectionViewController {
             return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerId, for: indexPath)
         } else if kind == HomeViewController.boxOfficeHeaderId {
             return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: boxOfficeId, for: indexPath)
+        } else if kind == UICollectionView.elementKindSectionHeader, indexPath.section == 0 {
+            let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+                                                                        withReuseIdentifier: CarouselHeaderView.reuseIdentifier,
+                                                                        for: indexPath) as! CarouselHeaderView
+            return header
         }
         fatalError("Unexpected element kind")
     }
@@ -98,56 +107,32 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
     private static func createSection(for sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? {
         if sectionIndex == 0 {
             let item = NSCollectionLayoutItem(
-                layoutSize: NSCollectionLayoutSize(
-                    widthDimension: .fractionalWidth(0.33),
-                    heightDimension: .absolute(300)
-                )
-            )
-            item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 16)
+                        layoutSize: NSCollectionLayoutSize(
+                            widthDimension: .fractionalWidth(1),
+                            heightDimension: .absolute(0) // Заменяем ячейки заголовком
+                        )
+                    )
 
-            let group = NSCollectionLayoutGroup.horizontal(
-                layoutSize: NSCollectionLayoutSize(
-                    widthDimension: .fractionalWidth(1),
-                    heightDimension: .absolute(300)
-                ),
-                subitems: [item]
-            )
+                    let group = NSCollectionLayoutGroup.vertical(
+                        layoutSize: NSCollectionLayoutSize(
+                            widthDimension: .fractionalWidth(1),
+                            heightDimension: .absolute(0) // Нет ячеек, только заголовок
+                        ),
+                        subitems: [item]
+                    )
 
-            let section = NSCollectionLayoutSection(group: group)
-            section.orthogonalScrollingBehavior = .paging
-            
-            section.visibleItemsInvalidationHandler = { (visibleItems, contentOffset, environment) in
-                let collectionViewWidth = environment.container.contentSize.width
-                let centerX = contentOffset.x + (collectionViewWidth / 2) // Центр экрана
-
-            
-                for item in visibleItems {
-                    let distanceFromCenter = centerX - item.frame.midX
-                    let normalizedDistance = distanceFromCenter / collectionViewWidth
-
-                    // Увеличиваем порог для определения центрального элемента
-                    let threshold: CGFloat = 0.30  // Увеличили порог для центрального элемента
-
-                    let scale: CGFloat
-                    let maxScale: CGFloat = 0.6  // Центральный элемент (уменьшен на 20%)
-                    let minScale: CGFloat = 1.0  // Боковые элементы (нормальные)
-
-                    // Если расстояние от центра меньше порога, это центральный элемент
-                    print("DEBUG \(abs(normalizedDistance))")
-                    
-                    if abs(normalizedDistance) < threshold {
-                        scale = maxScale
-                        print("MAXSCALE \(scale)")
-                    } else {
-                        scale = minScale
-                        print("MINSCALE \(scale)")
-                    }
-                    
-                    // масштабирвоание ячейки
-                }
-            }
-
-            return section
+                    let section = NSCollectionLayoutSection(group: group)
+                    section.boundarySupplementaryItems = [
+                        NSCollectionLayoutBoundarySupplementaryItem(
+                            layoutSize: NSCollectionLayoutSize(
+                                widthDimension: .fractionalWidth(1),
+                                heightDimension: .absolute(300) // Высота заголовка с каруселью
+                            ),
+                            elementKind: UICollectionView.elementKindSectionHeader,
+                            alignment: .top
+                        )
+                    ]
+                    return section
         
         } else if sectionIndex == 1 {
             let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .estimated(100), heightDimension: .absolute(60)))
