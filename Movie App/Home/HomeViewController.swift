@@ -12,7 +12,7 @@ final class HomeViewController: UICollectionViewController {
     let categoryCell = "categoryCell"
     let movieCell = "movieCell"
     
-    let categories = ["All", "Action", "Adventure", "Drama", "Comedy"]
+    let categories = ["All", "Action", "Adventure", "Drama", "Comedy", "Biography"]
         
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -122,6 +122,7 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
                     )
 
                     let section = NSCollectionLayoutSection(group: group)
+                    //section.contentInsets.top = 30
                     section.boundarySupplementaryItems = [
                         NSCollectionLayoutBoundarySupplementaryItem(
                             layoutSize: NSCollectionLayoutSize(
@@ -136,14 +137,16 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
         
         } else if sectionIndex == 1 {
             let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .estimated(100), heightDimension: .absolute(60)))
-            item.contentInsets.trailing = 20
+            //item.contentInsets.trailing = 20
             item.contentInsets.bottom = 16
         
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(70)), subitems: [item])
             
+            group.interItemSpacing = .fixed(15)
+            
             let section = NSCollectionLayoutSection(group: group)
             section.orthogonalScrollingBehavior = .continuous
-            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20)
+            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0)
             section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: categoryHeaderId, alignment: .topLeading)]
             return section
             

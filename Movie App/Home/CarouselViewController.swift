@@ -43,7 +43,7 @@ class CarouselViewController: UIViewController, UICollectionViewDelegate, UIColl
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        collectionView?.frame = CGRect(x: 0, y: 100, width: view.frame.size.width, height: 300).integral
+        collectionView?.frame = CGRect(x: 0, y: 0, width: view.frame.size.width, height: 300).integral
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
