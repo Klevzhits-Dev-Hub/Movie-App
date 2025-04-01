@@ -29,5 +29,21 @@ final class SettingPresenter{
 
 // MARK: - SettingPresenterProtocol
 extension SettingPresenter: SettingPresenterProtocol {
+    func nextButtonTapped() {
+        
+    }
+    
+    func changePasswordButtonTapped() {
+        
+    }
+    
+    func forgotPasswordButtonTapped() {
+        
+    }
+    
+    func darkModeButtonTapped() {
+        
+    }
+    
     
 }

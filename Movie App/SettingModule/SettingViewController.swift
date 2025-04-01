@@ -46,7 +46,7 @@ final class SettingViewController: UIViewController {
     private lazy var profileNameLabel: UILabel = {
         let label = UILabel()
         label.text = "Andy Lexsian"
-        label.font = label.font.withSize(18)
+        label.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 18)
         label.textColor = .black
         label.textAlignment = .left
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -56,8 +56,8 @@ final class SettingViewController: UIViewController {
     private lazy var nickNameLabel: UILabel = {
         let label = UILabel()
         label.text = "@Andy1999"
-        label.font = label.font.withSize(14)
-        label.textColor = .black
+        label.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 14)
+        label.textColor = .grayText
         label.textAlignment = .left
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -67,7 +67,7 @@ final class SettingViewController: UIViewController {
         let label = UILabel()
         label.text = "Personal Info"
         label.textColor = .black
-        label.font =  UIFont.systemFont(ofSize: 12, weight: .light)
+        label.font =  UIFont(name: Fonts.PlusJakartaSans.medium.rawValue, size: 12)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -77,7 +77,7 @@ final class SettingViewController: UIViewController {
         let image = UIImage(named: "person")?.withRenderingMode(.alwaysOriginal)
         button.setImage(image, for: .normal)
         button.setTitle("   Profile", for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
         button.contentHorizontalAlignment = .left
         button.tintColor = .black
         //            button.addTarget(self, action: #selector(nextButtonTapped), for: .touchUpInside)
@@ -98,7 +98,7 @@ final class SettingViewController: UIViewController {
         let label = UILabel()
         label.text = "Security"
         label.textColor = .black
-        label.font =  UIFont.systemFont(ofSize: 12, weight: .light)
+        label.font =  UIFont(name: Fonts.PlusJakartaSans.medium.rawValue, size: 12)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -108,7 +108,7 @@ final class SettingViewController: UIViewController {
         let image = UIImage(named: "lock")?.withRenderingMode(.alwaysOriginal)
         button.setImage(image, for: .normal)
         button.setTitle("   Change Password", for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
         button.contentHorizontalAlignment = .left
         button.tintColor = .black
         //       button.addTarget(self, action: #selector(changePasswordButtonTapped), for: .touchUpInside)
@@ -121,14 +121,13 @@ final class SettingViewController: UIViewController {
         let image = UIImage(named: "unlock")?.withRenderingMode(.alwaysOriginal)
         button.setImage(image, for: .normal)
         button.setTitle("   Forgot Password", for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
         button.contentHorizontalAlignment = .left
         button.tintColor = .black
         //       button.addTarget(self, action: #selector(forgotPasswordButtonTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-    
     
     private lazy var darkModeButton: UIButton = {
         let button = UIButton(type: .system)
@@ -142,7 +141,7 @@ final class SettingViewController: UIViewController {
     private let darkModeLabel: UILabel = {
         let label = UILabel()
         label.text = "Dark Mode"
-        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
         label.textColor = .black
         label.textAlignment = .left
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -152,7 +151,7 @@ final class SettingViewController: UIViewController {
     private lazy var customSwitch: UISwitch = {
         let uiSwitch = UISwitch()
         uiSwitch.isOn = false
-        uiSwitch.onTintColor = #colorLiteral(red: 0.3176470588, green: 0.3058823529, blue: 0.7137254902, alpha: 1)
+        uiSwitch.onTintColor = .selected
         // uiSwitch.addTarget(self, action: #selector(darkModeButtonTapped), for: .valueChanged)
         uiSwitch.translatesAutoresizingMaskIntoConstraints = false
         return uiSwitch
@@ -163,7 +162,7 @@ final class SettingViewController: UIViewController {
         button.setTitle("Log Out", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         button.backgroundColor = .none
-        button.tintColor = #colorLiteral(red: 0.3176470588, green: 0.3058823529, blue: 0.7137254902, alpha: 1)
+        button.tintColor = .selected
         button.layer.cornerRadius = 32
         button.layer.borderWidth = 1
         button.layer.borderColor = #colorLiteral(red: 0.3176470588, green: 0.3058823529, blue: 0.7137254902, alpha: 1)
