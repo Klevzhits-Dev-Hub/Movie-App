@@ -10,13 +10,15 @@ import UIKit
 final class HomeViewController: UICollectionViewController {
     let cellId = "cell"
     let categoryCell = "categoryCell"
+    let movieCell = "movieCell"
     
     let categories = ["All", "Action", "Adventure", "Drama", "Comedy"]
         
     override func viewDidLoad() {
         super.viewDidLoad()
-        collectionView.register(CategoryCell.self, forCellWithReuseIdentifier: categoryCell)
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: cellId)
+        collectionView.register(CategoryCell.self, forCellWithReuseIdentifier: categoryCell)
+        collectionView.register(BoxOfficeMovieCell.self, forCellWithReuseIdentifier: movieCell)
         collectionView.register(CategoryHeaderView.self, forSupplementaryViewOfKind: HomeViewController.categoryHeaderId, withReuseIdentifier: headerId)
         collectionView.register(BoxOfficeHeaderView.self, forSupplementaryViewOfKind: HomeViewController.boxOfficeHeaderId, withReuseIdentifier: boxOfficeId)
     }
@@ -70,8 +72,7 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
             cell.configure(with: categories[indexPath.item])
             return cell
         }
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath)
-        cell.backgroundColor = .red
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: movieCell, for: indexPath)
         return cell
     }
     
@@ -80,7 +81,8 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
     }
     
     static func createLayout() -> UICollectionViewCompositionalLayout {
-        return UICollectionViewCompositionalLayout { (sectionNumber, _) -> NSCollectionLayoutSection? in
+        //return UICollectionViewCompositionalLayout { (sectionNumber, _) -> NSCollectionLayoutSection? in
+        return UICollectionViewCompositionalLayout { (sectionNumber: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
             
             if sectionNumber == 0 {
                 
@@ -96,18 +98,19 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
                 
                 let section = NSCollectionLayoutSection(group: group)
                 section.orthogonalScrollingBehavior = .continuous
+                
                 return section
                 
             } else if sectionNumber == 1 {
-                let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(0.25), heightDimension: .absolute(60)))
-                item.contentInsets.trailing = 10
-                item.contentInsets.leading = 10
-                item.contentInsets.bottom = 16
+                let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .estimated(100), heightDimension: .absolute(60)))
+                item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 20)
+
             
-                let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(70)), subitems: [item])
+                let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .estimated(300), heightDimension: .estimated(70)), subitems: [item])
+                
                 let section = NSCollectionLayoutSection(group: group)
                 section.orthogonalScrollingBehavior = .continuous
-                section.contentInsets.leading = 10
+                section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20)
                 section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: categoryHeaderId, alignment: .topLeading)]
                 return section
                 
@@ -117,8 +120,8 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
             
                 let group = NSCollectionLayoutGroup.vertical(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(150 * 5 + 16 * 4)), subitems: [item])
                 let section = NSCollectionLayoutSection(group: group)
-                section.contentInsets.leading = 10
-                section.contentInsets.trailing = 10
+                section.contentInsets.leading = 20
+                section.contentInsets.trailing = 20
                 section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: boxOfficeHeaderId, alignment: .topLeading)]
                 return section
             }

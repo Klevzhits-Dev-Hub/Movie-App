@@ -32,8 +32,10 @@ class CategoryCell: UICollectionViewCell {
     
     func setConstraints() {
         NSLayoutConstraint.activate([
-            titleLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            titleLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
+            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            titleLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
         ])
     }
     
@@ -44,6 +46,7 @@ class CategoryCell: UICollectionViewCell {
     }
     
     func configure(with category: String) {
-        self.titleLabel.text = category
+        titleLabel.text = category
+        titleLabel.sizeToFit()
     }
 }
