@@ -31,6 +31,12 @@ final class HomeViewController: UICollectionViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func updateVisibleCellsColor() {
+        for cell in collectionView.visibleCells {
+            cell.backgroundColor = .green
+        }
+    }
+    
     let headerId = "headerId"
     static let categoryHeaderId = "categoryHeaderId"
     
@@ -55,17 +61,19 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if section == 0 {
-            return 6
+            return 8
         } else if section == 1 {
             return categories.count
         }
         return 10
     }
     
+    
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if indexPath.section == 0 {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath)
-            cell.backgroundColor = .red
+            cell.backgroundColor = .lightGray
+            
             return cell
         } else if indexPath.section == 1 {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: categoryCell, for: indexPath) as! CategoryCell
@@ -80,51 +88,90 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
         return .init(width: view.frame.width, height: 250)
     }
     
+    
     static func createLayout() -> UICollectionViewCompositionalLayout {
-        //return UICollectionViewCompositionalLayout { (sectionNumber, _) -> NSCollectionLayoutSection? in
-        return UICollectionViewCompositionalLayout { (sectionNumber: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
-            
-            if sectionNumber == 0 {
-                
-                let item = NSCollectionLayoutItem(
-                    layoutSize: .init(widthDimension: .fractionalWidth(0.33), heightDimension: .absolute(300))
+        return UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
+            return createSection(for: sectionIndex, layoutEnvironment: layoutEnvironment)
+        }
+    }
+
+    private static func createSection(for sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? {
+        if sectionIndex == 0 {
+            let item = NSCollectionLayoutItem(
+                layoutSize: NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(0.33),
+                    heightDimension: .absolute(300)
                 )
-                item.contentInsets.trailing = 16
+            )
+            item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 16)
+
+            let group = NSCollectionLayoutGroup.horizontal(
+                layoutSize: NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1),
+                    heightDimension: .absolute(300)
+                ),
+                subitems: [item]
+            )
+
+            let section = NSCollectionLayoutSection(group: group)
+            section.orthogonalScrollingBehavior = .paging
             
-                let group = NSCollectionLayoutGroup.horizontal(
-                    layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(300)),
-                    subitems: [item]
-                )
-                
-                let section = NSCollectionLayoutSection(group: group)
-                section.orthogonalScrollingBehavior = .continuous
-                
-                return section
-                
-            } else if sectionNumber == 1 {
-                let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .estimated(100), heightDimension: .absolute(60)))
-                item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 20)
+            section.visibleItemsInvalidationHandler = { (visibleItems, contentOffset, environment) in
+                let collectionViewWidth = environment.container.contentSize.width
+                let centerX = contentOffset.x + (collectionViewWidth / 2) // Центр экрана
 
             
-                let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .estimated(300), heightDimension: .estimated(70)), subitems: [item])
-                
-                let section = NSCollectionLayoutSection(group: group)
-                section.orthogonalScrollingBehavior = .continuous
-                section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20)
-                section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: categoryHeaderId, alignment: .topLeading)]
-                return section
-                
-            } else {
-                let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(150)))
-                item.contentInsets.bottom = 16
-            
-                let group = NSCollectionLayoutGroup.vertical(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(150 * 5 + 16 * 4)), subitems: [item])
-                let section = NSCollectionLayoutSection(group: group)
-                section.contentInsets.leading = 20
-                section.contentInsets.trailing = 20
-                section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: boxOfficeHeaderId, alignment: .topLeading)]
-                return section
+                for item in visibleItems {
+                    let distanceFromCenter = centerX - item.frame.midX
+                    let normalizedDistance = distanceFromCenter / collectionViewWidth
+
+                    // Увеличиваем порог для определения центрального элемента
+                    let threshold: CGFloat = 0.30  // Увеличили порог для центрального элемента
+
+                    let scale: CGFloat
+                    let maxScale: CGFloat = 0.6  // Центральный элемент (уменьшен на 20%)
+                    let minScale: CGFloat = 1.0  // Боковые элементы (нормальные)
+
+                    // Если расстояние от центра меньше порога, это центральный элемент
+                    print("DEBUG \(abs(normalizedDistance))")
+                    
+                    if abs(normalizedDistance) < threshold {
+                        scale = maxScale
+                        print("MAXSCALE \(scale)")
+                    } else {
+                        scale = minScale
+                        print("MINSCALE \(scale)")
+                    }
+                    
+                    // масштабирвоание ячейки
+                }
             }
+
+            return section
+        
+        } else if sectionIndex == 1 {
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .estimated(100), heightDimension: .absolute(60)))
+            item.contentInsets.trailing = 20
+            item.contentInsets.bottom = 16
+        
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(70)), subitems: [item])
+            
+            let section = NSCollectionLayoutSection(group: group)
+            section.orthogonalScrollingBehavior = .continuous
+            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20)
+            section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: categoryHeaderId, alignment: .topLeading)]
+            return section
+            
+        } else {
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(150)))
+            item.contentInsets.bottom = 16
+        
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(150 * 5 + 16 * 4)), subitems: [item])
+            let section = NSCollectionLayoutSection(group: group)
+            section.contentInsets.leading = 20
+            section.contentInsets.trailing = 20
+            section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: boxOfficeHeaderId, alignment: .topLeading)]
+            return section
         }
     }
 }
