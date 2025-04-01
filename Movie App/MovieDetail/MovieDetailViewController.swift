@@ -56,29 +56,34 @@ final class MovieDetailViewController: UIViewController {
         let element = UIStackView()
         element.axis = .horizontal
         element.spacing = 24
-        element.distribution = .fillEqually
+        element.distribution = .fillProportionally
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
     
-#warning("movieAboutStackView")
-    private lazy var view1: UIView = {
-        let element = UIView()
-        element.backgroundColor = .red
+    private lazy var timeLabel: UILabel = {
+        let element = UILabel()
+        element.text = "148 Minutes"
+        element.font = UIFont(name: Fonts.Montserrat.medium.rawValue, size: 12)
+        element.textColor = .gray
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
     
-    private lazy var view2: UIView = {
-        let element = UIView()
-        element.backgroundColor = .blue
+    private lazy var dataLabel: UILabel = {
+        let element = UILabel()
+        element.text = "17 Sep 2021"
+        element.font = UIFont(name: Fonts.Montserrat.medium.rawValue, size: 12)
+        element.textColor = .gray
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
     
-    private lazy var view3: UIView = {
-        let element = UIView()
-        element.backgroundColor = .black
+    private lazy var genreLabel: UILabel = {
+        let element = UILabel()
+        element.text = "Action"
+        element.font = UIFont(name: Fonts.Montserrat.medium.rawValue, size: 12)
+        element.textColor = .gray
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -180,6 +185,9 @@ final class MovieDetailViewController: UIViewController {
         return element
     }()
     
+    lazy var timeElements = makeStackView(image: UIImage(named: "timeImage"), view: timeLabel)
+    lazy var dataElements = makeStackView(image: UIImage(named: "dataImage"), view: dataLabel )
+    lazy var genreElements = makeStackView(image: UIImage(named: "filmIconImage"), view: genreLabel)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -191,6 +199,21 @@ final class MovieDetailViewController: UIViewController {
         isExpanded.toggle()
         movieDescrLabel.numberOfLines = isExpanded ? 0 : 6
         showMoreButton.setTitle(isExpanded ? "Show Less" : "Show More", for: .normal)
+    }
+    
+    func makeStackView(image: UIImage?, view: UIView) -> UIStackView {
+        let imageView = UIImageView()
+        
+        imageView.image = image
+        
+        imageView.widthAnchor.constraint(equalToConstant: 16).isActive = true
+        imageView.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        
+        let view = UIStackView(arrangedSubviews: [imageView, view])
+        view.axis = .horizontal
+        view.alignment = .center
+        view.spacing = 4
+        return view
     }
     
 }
@@ -232,9 +255,9 @@ private extension MovieDetailViewController {
         movieDetailStackView.addArrangedSubview(movieAboutStackView)
         movieDetailStackView.addArrangedSubview(ratingContainerView)
         
-        movieAboutStackView.addArrangedSubview(view1)
-        movieAboutStackView.addArrangedSubview(view2)
-        movieAboutStackView.addArrangedSubview(view3)
+        movieAboutStackView.addArrangedSubview(dataElements)
+        movieAboutStackView.addArrangedSubview(timeElements)
+        movieAboutStackView.addArrangedSubview(genreElements)
         
         ratingContainerView.addSubview(ratingView)
         
@@ -269,9 +292,9 @@ private extension MovieDetailViewController {
             movieDetailStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 42),
             movieDetailStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -42),
             
-            view1.heightAnchor.constraint(equalToConstant: 19),
-            view2.heightAnchor.constraint(equalToConstant: 19),
-            view3.heightAnchor.constraint(equalToConstant: 19),
+            dataElements.heightAnchor.constraint(equalToConstant: 19),
+            timeElements.heightAnchor.constraint(equalToConstant: 19),
+            genreElements.heightAnchor.constraint(equalToConstant: 19),
             ratingContainerView.heightAnchor.constraint(equalToConstant: 40),
             ratingView.centerXAnchor.constraint(equalTo: ratingContainerView.centerXAnchor),
             ratingView.heightAnchor.constraint(equalToConstant: 19),
