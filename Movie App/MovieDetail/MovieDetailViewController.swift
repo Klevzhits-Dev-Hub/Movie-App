@@ -46,6 +46,7 @@ final class MovieDetailViewController: UIViewController {
     private lazy var movieNameLabel: UILabel = {
         let element = UILabel()
         element.text = "Movie Name"
+        element.font = UIFont(name: Fonts.PlusJakartaSans.bold.rawValue, size: 24)
         element.textAlignment = .center
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
@@ -107,6 +108,7 @@ final class MovieDetailViewController: UIViewController {
     private lazy var movieSummaryLabel: UILabel = {
         let element = UILabel()
         element.text = "Story Line"
+        element.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -115,6 +117,8 @@ final class MovieDetailViewController: UIViewController {
         let element = UILabel()
         element.text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen bookLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book"
         element.numberOfLines = 6
+        element.font = UIFont(name: Fonts.PlusJakartaSans.medium.rawValue, size: 14)
+        element.textColor = UIColor(named: "GrayText")
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -123,6 +127,8 @@ final class MovieDetailViewController: UIViewController {
         let element = UIButton(type: .system)
         element.setTitle("Show More", for: .normal)
         element.addTarget(self, action: #selector(toggleText), for: .touchUpInside)
+        element.titleLabel?.font = UIFont(name: Fonts.PlusJakartaSans.medium.rawValue, size: 14)
+        element.titleLabel?.textColor = UIColor(named: "SelectedColor")
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -138,6 +144,7 @@ final class MovieDetailViewController: UIViewController {
     private lazy var actorLabel: UILabel = {
         let element = UILabel()
         element.text = "Cast and Crew"
+        element.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -163,6 +170,11 @@ final class MovieDetailViewController: UIViewController {
     private lazy var watchNowButton: UIButton = {
         let element = UIButton(type: .system)
         element.setTitle("Watch now", for: .normal)
+        element.setTitleColor(
+                UIColor(red: 254/255, green: 254/255, blue: 254/255, alpha: 1),
+                for: .normal
+            )
+        element.backgroundColor = UIColor(named: "SelectedColor")
         element.layer.cornerRadius = 24
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
@@ -173,8 +185,6 @@ final class MovieDetailViewController: UIViewController {
         super.viewDidLoad()
         setupViews()
         setupConstraints()
-        
-        
     }
     
     @objc private func toggleText() {

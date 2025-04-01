@@ -37,6 +37,10 @@ class ActorsCollectionViewCell: UICollectionViewCell {
     private lazy var actorNameLabel: UILabel = {
         let element = UILabel()
         element.text = "Actor Name"
+        element.font = UIFont(
+            name: Fonts.PlusJakartaSans.semiBold.rawValue,
+            size: 14
+        )
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -44,6 +48,11 @@ class ActorsCollectionViewCell: UICollectionViewCell {
     private lazy var actorRoleLabel: UILabel = {
         let element = UILabel()
         element.text = "Actor Role"
+        element.font = UIFont(
+            name: Fonts.PlusJakartaSans.medium.rawValue,
+            size: 10
+        )
+        element.textColor = UIColor(named: "GrayText")
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
