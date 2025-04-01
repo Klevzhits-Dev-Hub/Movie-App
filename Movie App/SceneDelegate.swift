@@ -23,7 +23,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let searchViewController = ViewController()
         let recentWatchViewController = ViewController()
         let homeViewController = ViewController() // Что это за экран??)
-        let wishlistViewController = ViewController()
+        let wishlistViewController = WishlistViewController()
         let settingsViewController = ViewController()
         
         tabBarController.viewControllers = [
