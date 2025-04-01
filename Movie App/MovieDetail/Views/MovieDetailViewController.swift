@@ -95,11 +95,10 @@ final class MovieDetailViewController: UIViewController {
     }()
     
 #warning("raiting")
-    private lazy var ratingView: UIView = {
-        let element = UIView()
-        element.backgroundColor = .black
-        element.translatesAutoresizingMaskIntoConstraints = false
-        return element
+    private lazy var starRatingView: StarRatingView = {
+        let view = StarRatingView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
     
     private lazy var movieSummaryStackView: UIStackView = {
@@ -120,11 +119,16 @@ final class MovieDetailViewController: UIViewController {
     
     private lazy var movieDescrLabel: UILabel = {
         let element = UILabel()
-        element.text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen bookLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book"
         element.numberOfLines = 6
+        element.text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen bookLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book"
         element.font = UIFont(name: Fonts.PlusJakartaSans.medium.rawValue, size: 14)
         element.textColor = UIColor(named: "GrayText")
+        element.isUserInteractionEnabled = true
         element.translatesAutoresizingMaskIntoConstraints = false
+
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleText))
+        element.addGestureRecognizer(tapGesture)
+
         return element
     }()
 #warning("Кнопка show more")
@@ -189,19 +193,21 @@ final class MovieDetailViewController: UIViewController {
     lazy var dataElements = makeStackView(image: UIImage(named: "dataImage"), view: dataLabel )
     lazy var genreElements = makeStackView(image: UIImage(named: "filmIconImage"), view: genreLabel)
     
+    // MARK: - Life Circle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
         setupConstraints()
     }
     
+    // MARK: - Private Methods
     @objc private func toggleText() {
         isExpanded.toggle()
         movieDescrLabel.numberOfLines = isExpanded ? 0 : 6
         showMoreButton.setTitle(isExpanded ? "Show Less" : "Show More", for: .normal)
     }
     
-    func makeStackView(image: UIImage?, view: UIView) -> UIStackView {
+    private func makeStackView(image: UIImage?, view: UIView) -> UIStackView {
         let imageView = UIImageView()
         
         imageView.image = image
@@ -234,8 +240,6 @@ extension MovieDetailViewController: UICollectionViewDataSource {
         
         return cell
     }
-    
-    
 }
 
 // MARK: - Set Views and Setup Constraints
@@ -259,7 +263,7 @@ private extension MovieDetailViewController {
         movieAboutStackView.addArrangedSubview(timeElements)
         movieAboutStackView.addArrangedSubview(genreElements)
         
-        ratingContainerView.addSubview(ratingView)
+        ratingContainerView.addSubview(starRatingView)
         
         movieSummaryStackView.addArrangedSubview(movieSummaryLabel)
         movieSummaryStackView.addArrangedSubview(movieDescrLabel)
@@ -295,10 +299,9 @@ private extension MovieDetailViewController {
             dataElements.heightAnchor.constraint(equalToConstant: 19),
             timeElements.heightAnchor.constraint(equalToConstant: 19),
             genreElements.heightAnchor.constraint(equalToConstant: 19),
-            ratingContainerView.heightAnchor.constraint(equalToConstant: 40),
-            ratingView.centerXAnchor.constraint(equalTo: ratingContainerView.centerXAnchor),
-            ratingView.heightAnchor.constraint(equalToConstant: 19),
-            ratingView.widthAnchor.constraint(equalToConstant: 104),
+            ratingContainerView.heightAnchor.constraint(equalToConstant: 16),
+            starRatingView.centerXAnchor.constraint(equalTo: ratingContainerView.centerXAnchor),
+            starRatingView.centerYAnchor.constraint(equalTo: ratingContainerView.centerYAnchor),
             
             movieSummaryStackView.topAnchor.constraint(equalTo: movieDetailStackView.bottomAnchor, constant: 32),
             movieSummaryStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 42),
