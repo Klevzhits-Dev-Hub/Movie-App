@@ -1,5 +1,20 @@
+//
+//  ProfileViewController.swift
+//  Movie App
+//
+//  Created by Екатерина Орлова on 01.04.2025.
+//
+
+import UIKit
+
+protocol ProfileViewProtocol: AnyObject {
+    
+}
+
 final class ProfileViewController: UIViewController {
     //MARK: - Properties
+    private let presenter: ProfilePresenterProtocol
+    
     private lazy var titleLabel: UILabel = {
         let element = UILabel()
         element.text = "Profile"
@@ -54,6 +69,19 @@ final class ProfileViewController: UIViewController {
         setupView()
         setupConstraints()
     }
+    
+    init(presenter: ProfilePresenterProtocol) {
+        self.presenter = presenter
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable, message: "unavailable")
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+}
+
 private extension ProfileViewController {
     func setupView(){
         
@@ -61,4 +89,9 @@ private extension ProfileViewController {
     func setupConstraints() {
         
     }
+}
+
+// MARK: - ProfileViewProtocol
+extension ProfileViewController: ProfileViewProtocol {
+    
 }
