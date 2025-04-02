@@ -51,7 +51,6 @@ final class StarRatingView: UIView {
 
 private extension StarRatingView {
     func setupView() {
-        
         addSubview(starsStackView)
         addStarImage()
     }

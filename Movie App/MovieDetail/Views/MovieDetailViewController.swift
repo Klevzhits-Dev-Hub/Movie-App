@@ -8,12 +8,7 @@
 import UIKit
 
 final class MovieDetailViewController: UIViewController {
-    
-    private let collapsedLines = 6
-    private var isExpanded = false
-    
     // MARK: - UI
-    
     private lazy var scrollView: UIScrollView = {
         let element = UIScrollView()
         element.translatesAutoresizingMaskIntoConstraints = false
@@ -109,37 +104,10 @@ final class MovieDetailViewController: UIViewController {
         return element
     }()
     
-    private lazy var movieSummaryLabel: UILabel = {
-        let element = UILabel()
-        element.text = "Story Line"
-        element.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
-        element.translatesAutoresizingMaskIntoConstraints = false
-        return element
-    }()
-    
-    private lazy var movieDescrLabel: UILabel = {
-        let element = UILabel()
-        element.numberOfLines = 6
-        element.text = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen bookLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book"
-        element.font = UIFont(name: Fonts.PlusJakartaSans.medium.rawValue, size: 14)
-        element.textColor = UIColor(named: "GrayText")
-        element.isUserInteractionEnabled = true
-        element.translatesAutoresizingMaskIntoConstraints = false
-
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleText))
-        element.addGestureRecognizer(tapGesture)
-
-        return element
-    }()
-#warning("Кнопка show more")
-    private lazy var showMoreButton: UIButton = {
-        let element = UIButton(type: .system)
-        element.setTitle("Show More", for: .normal)
-        element.addTarget(self, action: #selector(toggleText), for: .touchUpInside)
-        element.titleLabel?.font = UIFont(name: Fonts.PlusJakartaSans.medium.rawValue, size: 14)
-        element.titleLabel?.textColor = UIColor(named: "SelectedColor")
-        element.translatesAutoresizingMaskIntoConstraints = false
-        return element
+    private lazy var movieDescriptionView: StoryLineView = {
+        let view = StoryLineView(collapsedLines: 6)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
     
     private lazy var actorStackView: UIStackView = {
@@ -180,9 +148,9 @@ final class MovieDetailViewController: UIViewController {
         let element = UIButton(type: .system)
         element.setTitle("Watch now", for: .normal)
         element.setTitleColor(
-                UIColor(red: 254/255, green: 254/255, blue: 254/255, alpha: 1),
-                for: .normal
-            )
+            UIColor(red: 254/255, green: 254/255, blue: 254/255, alpha: 1),
+            for: .normal
+        )
         element.backgroundColor = UIColor(named: "SelectedColor")
         element.layer.cornerRadius = 24
         element.translatesAutoresizingMaskIntoConstraints = false
@@ -193,18 +161,27 @@ final class MovieDetailViewController: UIViewController {
     lazy var dataElements = makeStackView(image: UIImage(named: "dataImage"), view: dataLabel )
     lazy var genreElements = makeStackView(image: UIImage(named: "filmIconImage"), view: genreLabel)
     
+    
+    
+    private let movieDescriptionText = """
+    Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
+    Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, 
+    when an unknown printer took a galley of type and scrambled it to make a type specimen book.
+    """
     // MARK: - Life Circle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
         setupConstraints()
+        configureDescription()
     }
     
     // MARK: - Private Methods
-    @objc private func toggleText() {
-        isExpanded.toggle()
-        movieDescrLabel.numberOfLines = isExpanded ? 0 : 6
-        showMoreButton.setTitle(isExpanded ? "Show Less" : "Show More", for: .normal)
+    private func configureDescription() {
+        movieDescriptionView.configure(
+            title: "Story Line",
+            description: movieDescriptionText
+        )
     }
     
     private func makeStackView(image: UIImage?, view: UIView) -> UIStackView {
@@ -265,9 +242,7 @@ private extension MovieDetailViewController {
         
         ratingContainerView.addSubview(starRatingView)
         
-        movieSummaryStackView.addArrangedSubview(movieSummaryLabel)
-        movieSummaryStackView.addArrangedSubview(movieDescrLabel)
-        movieSummaryStackView.addArrangedSubview(showMoreButton)
+        movieSummaryStackView.addArrangedSubview(movieDescriptionView)
         
         actorStackView.addArrangedSubview(actorLabel)
         actorStackView.addArrangedSubview(actorCollectionView)
@@ -299,6 +274,7 @@ private extension MovieDetailViewController {
             dataElements.heightAnchor.constraint(equalToConstant: 19),
             timeElements.heightAnchor.constraint(equalToConstant: 19),
             genreElements.heightAnchor.constraint(equalToConstant: 19),
+            
             ratingContainerView.heightAnchor.constraint(equalToConstant: 16),
             starRatingView.centerXAnchor.constraint(equalTo: ratingContainerView.centerXAnchor),
             starRatingView.centerYAnchor.constraint(equalTo: ratingContainerView.centerYAnchor),
@@ -307,22 +283,16 @@ private extension MovieDetailViewController {
             movieSummaryStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 42),
             movieSummaryStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -42),
             
-            showMoreButton.trailingAnchor.constraint(equalTo: movieSummaryStackView.trailingAnchor),
-            
             actorStackView.topAnchor.constraint(equalTo: movieSummaryStackView.bottomAnchor, constant: 24),
             actorStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 42),
             actorStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -42),
-            
             actorCollectionView.heightAnchor.constraint(equalToConstant: 41),
             
-            watchNowButton.topAnchor.constraint( equalTo: actorStackView.bottomAnchor, constant: 24),
+            watchNowButton.topAnchor.constraint(equalTo: actorStackView.bottomAnchor, constant: 24),
             watchNowButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             watchNowButton.widthAnchor.constraint(equalToConstant: 181),
             watchNowButton.heightAnchor.constraint(equalToConstant: 56),
-            watchNowButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -22),
+            watchNowButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -22)
         ])
     }
 }
-
-
-
