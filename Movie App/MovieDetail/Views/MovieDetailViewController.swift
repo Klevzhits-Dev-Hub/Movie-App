@@ -8,6 +8,10 @@
 import UIKit
 
 final class MovieDetailViewController: UIViewController {
+    
+    // MARK: - Private Properties
+    private let movieDescriptionText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    
     // MARK: - UI
     private lazy var scrollView: UIScrollView = {
         let element = UIScrollView()
@@ -89,7 +93,6 @@ final class MovieDetailViewController: UIViewController {
         return element
     }()
     
-#warning("raiting")
     private lazy var starRatingView: StarRatingView = {
         let view = StarRatingView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -161,13 +164,6 @@ final class MovieDetailViewController: UIViewController {
     lazy var dataElements = makeStackView(image: UIImage(named: "dataImage"), view: dataLabel )
     lazy var genreElements = makeStackView(image: UIImage(named: "filmIconImage"), view: genreLabel)
     
-    
-    
-    private let movieDescriptionText = """
-    Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
-    Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, 
-    when an unknown printer took a galley of type and scrambled it to make a type specimen book.
-    """
     // MARK: - Life Circle
     override func viewDidLoad() {
         super.viewDidLoad()
