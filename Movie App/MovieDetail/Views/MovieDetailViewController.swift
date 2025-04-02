@@ -258,7 +258,7 @@ private extension MovieDetailViewController {
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
-            movieImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            movieImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
             movieImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             movieImageView.heightAnchor.constraint(equalToConstant: 300),
             movieImageView.widthAnchor.constraint(equalToConstant: 224),
