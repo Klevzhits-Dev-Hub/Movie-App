@@ -111,27 +111,59 @@ final class StoryLineView: UIView {
     private func showCollapsedTextWithButton() {
         descriptionLabel.numberOfLines = collapsedLines
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            let label = self.descriptionLabel
+        DispatchQueue.main.async {
             let trailing = TrailingContent.readmore
-            let font = label.font ?? UIFont.systemFont(ofSize: 14)
+            let font = self.descriptionLabel.font ?? UIFont.systemFont(ofSize: 14)
             
-            let truncatedText = self.truncateText(
+            let lineHeight = font.lineHeight
+            let maxHeight = lineHeight * CGFloat(self.collapsedLines)
+            
+            let tempLabel = UILabel()
+            tempLabel.font = font
+            tempLabel.numberOfLines = self.collapsedLines
+            tempLabel.frame.size.width = self.descriptionLabel.bounds.width
+            
+            let truncatedText = self.findTruncationPoint(
                 text: self.fullText,
-                maxWidth: label.bounds.width,
-                font: font,
-                maxLines: self.collapsedLines,
+                maxHeight: maxHeight,
+                label: tempLabel,
                 trailingText: trailing.text
             )
             
-            let attributedString = NSMutableAttributedString(string: truncatedText)
-            if let range = truncatedText.range(of: trailing.text) {
-                let nsRange = NSRange(range, in: truncatedText)
+            let fullString = truncatedText + trailing.text
+            let attributedString = NSMutableAttributedString(string: fullString)
+            if let range = fullString.range(of: trailing.text) {
+                let nsRange = NSRange(range, in: fullString)
                 attributedString.addAttribute(.foregroundColor, value: trailing.color, range: nsRange)
             }
             
             self.descriptionLabel.attributedText = attributedString
         }
+    }
+    
+    private func findTruncationPoint(text: String, maxHeight: CGFloat, label: UILabel, trailingText: String) -> String {
+        var lowerBound = 0
+        var upperBound = text.count
+        var mid = 0
+        var result = ""
+        
+        while lowerBound < upperBound {
+            mid = (lowerBound + upperBound) / 2
+            let index = text.index(text.startIndex, offsetBy: mid)
+            let substring = String(text[..<index]) + trailingText
+            
+            label.text = substring
+            let height = label.sizeThatFits(CGSize(width: label.bounds.width, height: .greatestFiniteMagnitude)).height
+            
+            if height <= maxHeight {
+                result = String(text[..<index])
+                lowerBound = mid + 1
+            } else {
+                upperBound = mid
+            }
+        }
+        
+        return result
     }
     
     private func truncateText(text: String, maxWidth: CGFloat, font: UIFont, maxLines: Int, trailingText: String) -> String {

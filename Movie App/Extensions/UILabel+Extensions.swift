@@ -13,7 +13,7 @@ enum TrailingContent {
     
     var text: String {
         switch self {
-        case .readmore: return "Show More"
+        case .readmore: return " Show More"
         case .readless: return "Show Less"
         }
     }
