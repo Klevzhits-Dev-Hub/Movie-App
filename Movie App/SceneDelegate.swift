@@ -22,7 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let searchViewController = ViewController()
         let recentWatchViewController = ViewController()
-        let homeViewController = HomeViewController()
+        let homeViewController = UINavigationController(rootViewController: HomeViewController())
         let wishlistViewController = WishlistViewController()
         let settingsViewController = ViewController()
         

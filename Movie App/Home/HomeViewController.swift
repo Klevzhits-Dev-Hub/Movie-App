@@ -25,6 +25,15 @@ final class HomeViewController: UICollectionViewController {
         collectionView.register(CategoryHeaderView.self, forSupplementaryViewOfKind: HomeViewController.categoryHeaderId, withReuseIdentifier: headerId)
         collectionView.register(BoxOfficeHeaderView.self, forSupplementaryViewOfKind: HomeViewController.boxOfficeHeaderId, withReuseIdentifier: boxOfficeId)
         
+        setupNavigationBar()
+        setupLargeNavBar()
+
+        navigationController?.navigationBar.prefersLargeTitles = false
+        navigationController?.navigationBar.barTintColor = .black
+        navigationController?.navigationBar.tintColor = .white
+        
+        collectionView.contentInset.top = 25
+        
     }
         
     init() {
@@ -61,6 +70,83 @@ final class HomeViewController: UICollectionViewController {
         fatalError("Unexpected element kind")
     }
     
+    private func setupNavigationBar() {
+        let titleView = UIView()
+        titleView.translatesAutoresizingMaskIntoConstraints = false
+        titleView.backgroundColor = .clear
+        
+        let imageView = UIImageView(image: UIImage(named: "logoMock"))
+        imageView.contentMode = .scaleAspectFill
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.clipsToBounds = true
+
+        imageView.widthAnchor.constraint(equalToConstant: 50).isActive = true
+        imageView.heightAnchor.constraint(equalToConstant: 50).isActive = true
+
+        imageView.layer.cornerRadius = 25
+        
+        let label = UILabel()
+        label.text = "Hi, Andy"
+        label.font = UIFont.boldSystemFont(ofSize: 22)
+        label.textColor = .black
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        let description = UILabel()
+        description.text = "only streaming movie lovers"
+        description.font = UIFont.systemFont(ofSize: 16)
+        description.textColor = .systemGray
+        description.translatesAutoresizingMaskIntoConstraints = false
+        
+        let textStackView = UIStackView(arrangedSubviews: [label, description])
+        textStackView.axis = .vertical
+        textStackView.spacing = 4
+        textStackView.alignment = .leading
+        textStackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let stackView = UIStackView(arrangedSubviews: [imageView, textStackView])
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        stackView.alignment = .center
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        titleView.addSubview(stackView)
+        
+        NSLayoutConstraint.activate([
+            stackView.leadingAnchor.constraint(equalTo: titleView.leadingAnchor, constant: 10),
+            stackView.trailingAnchor.constraint(equalTo: titleView.trailingAnchor, constant: -10),
+            stackView.centerYAnchor.constraint(equalTo: titleView.centerYAnchor),
+            titleView.heightAnchor.constraint(equalToConstant: 44),
+        ])
+        
+        let leftItem = UIBarButtonItem(customView: titleView)
+        navigationItem.leftBarButtonItem = leftItem
+    }
+
+    private func setupLargeNavBar() {
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithTransparentBackground()
+        appearance.backgroundColor = .white
+        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.black]
+
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
+
+        let customNavBarBackground = UIView()
+        customNavBarBackground.backgroundColor = .white
+        customNavBarBackground.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(customNavBarBackground)
+
+        NSLayoutConstraint.activate([
+            customNavBarBackground.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            customNavBarBackground.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            customNavBarBackground.topAnchor.constraint(equalTo: view.topAnchor),
+            customNavBarBackground.heightAnchor.constraint(equalToConstant: 120) // Высота навбара
+        ])
+        
+        view.bringSubviewToFront(navigationController!.navigationBar)
+    }
 }
 
 extension HomeViewController: UICollectionViewDelegateFlowLayout {
