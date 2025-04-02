@@ -9,15 +9,12 @@ import UIKit
 
 final class StoryLineView: UIView {
     
-    // MARK: - Properties
     private let collapsedLines: Int
     private var isExpanded = false
     private var fullText: String = ""
     
-    // MARK: - UI Elements
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Story Line"
         label.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -31,35 +28,32 @@ final class StoryLineView: UIView {
         label.isUserInteractionEnabled = true
         label.lineBreakMode = .byTruncatingTail
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.setContentHuggingPriority(.required, for: .vertical)
+        label.setContentCompressionResistancePriority(.required, for: .vertical)
         return label
     }()
     
-    // MARK: - Initialization
-    init(collapsedLines: Int = 3) {
+    init(collapsedLines: Int = 6) {
         self.collapsedLines = collapsedLines
         super.init(frame: .zero)
         setupViews()
         setupConstraints()
+        setupGesture()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Public Methods
     func configure(title: String, description: String) {
         titleLabel.text = title
         self.fullText = description
-        updateText()
+        updateTextDisplay()
     }
     
-    // MARK: - Private Methods
     private func setupViews() {
         addSubview(titleLabel)
         addSubview(descriptionLabel)
-        
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleButtonTap))
-        descriptionLabel.addGestureRecognizer(tapGesture)
     }
     
     private func setupConstraints() {
@@ -75,33 +69,43 @@ final class StoryLineView: UIView {
         ])
     }
     
-    @objc private func handleButtonTap(_ gesture: UITapGestureRecognizer) {
-        let location = gesture.location(in: descriptionLabel)
+    private func setupGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        descriptionLabel.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
+        guard let text = descriptionLabel.text else { return }
         
-        // Проверяем, было ли нажатие на "Read More/Less"
-        if let text = descriptionLabel.text,
-           let attributedText = descriptionLabel.attributedText,
-           let range = text.range(of: isExpanded ? "Read Less" : "Read More") {
-            
+        let trailingText = isExpanded ? TrailingContent.readless.text : TrailingContent.readmore.text
+        if let range = text.range(of: trailingText) {
             let nsRange = NSRange(range, in: text)
-            let layoutManager = NSLayoutManager()
-            let textContainer = NSTextContainer(size: descriptionLabel.bounds.size)
-            let textStorage = NSTextStorage(attributedString: attributedText)
+            let location = gesture.location(in: descriptionLabel)
             
-            layoutManager.addTextContainer(textContainer)
-            textStorage.addLayoutManager(layoutManager)
-            
-            let glyphIndex = layoutManager.glyphIndex(for: location, in: textContainer)
-            let characterIndex = layoutManager.characterIndexForGlyph(at: glyphIndex)
-            
-            if NSLocationInRange(characterIndex, nsRange) {
+            if isTapInRange(location: location, range: nsRange) {
                 isExpanded.toggle()
-                updateText()
+                updateTextDisplay()
             }
         }
     }
     
-    private func updateText() {
+    private func isTapInRange(location: CGPoint, range: NSRange) -> Bool {
+        guard let attributedText = descriptionLabel.attributedText else { return false }
+        
+        let layoutManager = NSLayoutManager()
+        let textContainer = NSTextContainer(size: descriptionLabel.bounds.size)
+        let textStorage = NSTextStorage(attributedString: attributedText)
+        
+        layoutManager.addTextContainer(textContainer)
+        textStorage.addLayoutManager(layoutManager)
+        
+        let glyphIndex = layoutManager.glyphIndex(for: location, in: textContainer)
+        let characterIndex = layoutManager.characterIndexForGlyph(at: glyphIndex)
+        
+        return NSLocationInRange(characterIndex, range)
+    }
+    
+    private func updateTextDisplay() {
         if isExpanded {
             showFullText()
         } else {
@@ -110,22 +114,62 @@ final class StoryLineView: UIView {
     }
     
     private func showFullText() {
-        let text = fullText + " Read Less"
-        let attributedString = NSMutableAttributedString(string: text)
-        let range = (text as NSString).range(of: "Read Less")
-        attributedString.addAttribute(.foregroundColor, value: UIColor.systemBlue, range: range)
+        let trailing = TrailingContent.readless
+        let fullString = fullText + trailing.text
+        let attributedString = NSMutableAttributedString(string: fullString)
+        
+        if let range = fullString.range(of: trailing.text) {
+            let nsRange = NSRange(range, in: fullString)
+            attributedString.addAttribute(.foregroundColor, value: trailing.color, range: nsRange)
+        }
         
         descriptionLabel.numberOfLines = 0
         descriptionLabel.attributedText = attributedString
     }
     
     private func showCollapsedText() {
-        let text = String(fullText.prefix(150)) + "... Read More"
-        let attributedString = NSMutableAttributedString(string: text)
-        let range = (text as NSString).range(of: "Read More")
-        attributedString.addAttribute(.foregroundColor, value: UIColor.systemBlue, range: range)
-        
-        descriptionLabel.numberOfLines = collapsedLines
-        descriptionLabel.attributedText = attributedString
+        DispatchQueue.main.async {
+            let trailing = TrailingContent.readmore
+            let maxLines = self.collapsedLines
+            
+            // 1. Создаем временный лейбл для расчетов
+            let tempLabel = UILabel()
+            tempLabel.font = self.descriptionLabel.font
+            tempLabel.numberOfLines = maxLines
+            tempLabel.lineBreakMode = .byTruncatingTail
+            tempLabel.frame.size.width = self.descriptionLabel.bounds.width
+            
+            // 2. Рассчитываем примерное количество символов для 6 строк
+            let avgCharsPerLine = Int(self.descriptionLabel.bounds.width / 7) // примерная ширина символа
+            let maxChars = avgCharsPerLine * maxLines
+            
+            // 3. Берем подстроку и добавляем кнопку
+            let truncatedText = String(self.fullText.prefix(maxChars)) + trailing.text
+            tempLabel.text = truncatedText
+            
+            // 4. Проверяем, помещается ли текст
+            let textSize = tempLabel.sizeThatFits(CGSize(width: tempLabel.bounds.width, height: .greatestFiniteMagnitude))
+            let lineHeight = self.descriptionLabel.font.lineHeight
+            let maxHeight = lineHeight * CGFloat(maxLines)
+            
+            let finalText: String
+            if textSize.height <= maxHeight {
+                finalText = truncatedText
+            } else {
+                // Если не помещается - обрезаем больше
+                let adjustedChars = Int(Double(maxChars) * 0.9)
+                finalText = String(self.fullText.prefix(adjustedChars)) + trailing.text
+            }
+            
+            // 5. Устанавливаем текст с подсветкой кнопки
+            let attributedString = NSMutableAttributedString(string: finalText)
+            if let range = finalText.range(of: trailing.text) {
+                let nsRange = NSRange(range, in: finalText)
+                attributedString.addAttribute(.foregroundColor, value: trailing.color, range: nsRange)
+            }
+            
+            self.descriptionLabel.numberOfLines = maxLines
+            self.descriptionLabel.attributedText = attributedString
+        }
     }
 }

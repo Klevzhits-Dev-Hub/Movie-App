@@ -276,12 +276,12 @@ private extension MovieDetailViewController {
             starRatingView.centerYAnchor.constraint(equalTo: ratingContainerView.centerYAnchor),
             
             movieSummaryStackView.topAnchor.constraint(equalTo: movieDetailStackView.bottomAnchor, constant: 32),
-            movieSummaryStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 42),
-            movieSummaryStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -42),
+            movieSummaryStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            movieSummaryStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
             
             actorStackView.topAnchor.constraint(equalTo: movieSummaryStackView.bottomAnchor, constant: 24),
-            actorStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 42),
-            actorStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -42),
+            actorStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            actorStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
             actorCollectionView.heightAnchor.constraint(equalToConstant: 41),
             
             watchNowButton.topAnchor.constraint(equalTo: actorStackView.bottomAnchor, constant: 24),
