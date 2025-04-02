@@ -20,6 +20,7 @@ final class BoxOfficeHeaderView: UICollectionReusableView {
         button.setTitle("See All", for: .normal)
         button.setTitleColor(.systemBlue, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        button.setTitleColor(UIColor(named: "AccentColor"), for: .normal)
         return button
     }()
 

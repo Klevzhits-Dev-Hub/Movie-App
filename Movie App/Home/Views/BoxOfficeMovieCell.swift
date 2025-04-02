@@ -163,6 +163,7 @@ class BoxOfficeMovieCell: UICollectionViewCell {
     
     @objc func toggleFavourite() {
         print("tapped")
+        
     }
     
     func configure(with category: String) {

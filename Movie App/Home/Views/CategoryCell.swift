@@ -52,7 +52,7 @@ class CategoryCell: UICollectionViewCell {
     
     override var isSelected: Bool {
         didSet {
-            contentView.backgroundColor = isSelected ? .blue : .white
+            contentView.backgroundColor = isSelected ? UIColor(named: "AccentColor") : .white
             titleLabel.textColor = isSelected ? .white : .gray
         }
     }

@@ -92,6 +92,23 @@ class CarouselViewController: UIViewController, UICollectionViewDelegate, UIColl
         let maxScale: CGFloat = 1.0
         let minScale: CGFloat = 0.75  // Уменьшение
 
+        var closestCell: UICollectionViewCell?
+        var minDistance: CGFloat = CGFloat.greatestFiniteMagnitude
+
+        // Определяем ближайшую к центру ячейку
+        for cell in collectionView!.visibleCells {
+            guard let indexPath = collectionView!.indexPath(for: cell),
+                  let attributes = collectionView!.layoutAttributesForItem(at: indexPath) else { continue }
+
+            let distanceFromCenter = abs(centerX - attributes.frame.midX)
+
+            if distanceFromCenter < minDistance {
+                minDistance = distanceFromCenter
+                closestCell = cell
+            }
+        }
+
+        // Применяем трансформацию для всех видимых ячеек
         for cell in collectionView!.visibleCells {
             guard let indexPath = collectionView!.indexPath(for: cell),
                   let attributes = collectionView!.layoutAttributesForItem(at: indexPath) else { continue }
@@ -99,13 +116,23 @@ class CarouselViewController: UIViewController, UICollectionViewDelegate, UIColl
             let distanceFromCenter = centerX - attributes.frame.midX
             let normalizedDistance = distanceFromCenter / scrollView.frame.width
 
+            // Устанавливаем угол поворота
             let rotationAngle = -normalizedDistance * maxRotationAngle
 
+            // Определяем масштаб для ячейки
             let scale = abs(normalizedDistance) > 0.30 ? minScale : maxScale
 
-            UIView.animate(withDuration: 0.3) {
-                cell.transform = CGAffineTransform(scaleX: scale, y: scale)
-                    .rotated(by: rotationAngle * .pi / 180)
+            // Если ячейка является ближайшей к центру, увеличиваем ее до максимума, остальные — уменьшаем
+            if cell == closestCell {
+                UIView.animate(withDuration: 0.3) {
+                    cell.transform = CGAffineTransform(scaleX: maxScale, y: maxScale)
+                        .rotated(by: rotationAngle * .pi / 180)
+                }
+            } else {
+                UIView.animate(withDuration: 0.3) {
+                    cell.transform = CGAffineTransform(scaleX: minScale, y: minScale)
+                        .rotated(by: rotationAngle * .pi / 180)
+                }
             }
         }
     }
