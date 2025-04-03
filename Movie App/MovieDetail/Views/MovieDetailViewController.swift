@@ -129,6 +129,14 @@ final class MovieDetailViewController: UIViewController {
         return element
     }()
     
+    private lazy var actorCollectionContainer: UIView = {
+        let element = UIView()
+        element.translatesAutoresizingMaskIntoConstraints = false
+        element.backgroundColor = .clear
+        element.clipsToBounds = false
+        return element
+    }()
+    
     private lazy var actorCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
@@ -144,6 +152,7 @@ final class MovieDetailViewController: UIViewController {
             ActorsCollectionViewCell.self,
             forCellWithReuseIdentifier: ActorsCollectionViewCell.identifier
         )
+        
         return collectionView
     }()
     
@@ -167,9 +176,15 @@ final class MovieDetailViewController: UIViewController {
     // MARK: - Life Circle
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor(named: "BackgroundColor")
         setupViews()
         setupConstraints()
         configureDescription()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        setupShadow()
     }
     
     // MARK: - Private Methods
@@ -195,6 +210,25 @@ final class MovieDetailViewController: UIViewController {
         return view
     }
     
+    private func setupShadow() {
+        actorCollectionContainer.layer.shadowColor = UIColor.black.cgColor
+        actorCollectionContainer.layer.shadowOpacity = 1
+        actorCollectionContainer.layer.shadowRadius = 60
+        
+        let shadowHeight = actorCollectionContainer.bounds.height * 0.5
+        
+        let shadowPath = UIBezierPath()
+        shadowPath.move(to: CGPoint(x: 0, y: actorCollectionContainer.bounds.height - shadowHeight))
+        shadowPath.addLine(to: CGPoint(x: actorCollectionContainer.bounds.width, y: actorCollectionContainer.bounds.height - shadowHeight))
+        shadowPath.addLine(to: CGPoint(x: actorCollectionContainer.bounds.width, y: actorCollectionContainer.bounds.height))
+        shadowPath.addLine(to: CGPoint(x: 0, y: actorCollectionContainer.bounds.height))
+        shadowPath.close()
+        
+        actorCollectionContainer.layer.shadowPath = shadowPath.cgPath
+        actorCollectionContainer.layer.shadowOffset = CGSize(width: 40, height: 0)
+        actorCollectionContainer.layer.shouldRasterize = true
+        actorCollectionContainer.layer.rasterizationScale = UIScreen.main.scale
+    }
 }
 
 // MARK: - UICollectionViewDataSource
@@ -241,7 +275,8 @@ private extension MovieDetailViewController {
         movieSummaryStackView.addArrangedSubview(movieDescriptionView)
         
         actorStackView.addArrangedSubview(actorLabel)
-        actorStackView.addArrangedSubview(actorCollectionView)
+        actorStackView.addArrangedSubview(actorCollectionContainer)
+        actorCollectionContainer.addSubview(actorCollectionView)
     }
     
     func setupConstraints() {
@@ -282,7 +317,12 @@ private extension MovieDetailViewController {
             actorStackView.topAnchor.constraint(equalTo: movieSummaryStackView.bottomAnchor, constant: 24),
             actorStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
             actorStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
-            actorCollectionView.heightAnchor.constraint(equalToConstant: 41),
+            actorCollectionView.topAnchor.constraint(equalTo: actorCollectionContainer.topAnchor),
+            actorCollectionView.leadingAnchor.constraint(equalTo: actorCollectionContainer.leadingAnchor),
+            actorCollectionView.trailingAnchor.constraint(equalTo: actorCollectionContainer.trailingAnchor),
+            actorCollectionView.bottomAnchor.constraint(equalTo: actorCollectionContainer.bottomAnchor),
+
+            actorCollectionContainer.heightAnchor.constraint(equalToConstant: 41),
             
             watchNowButton.topAnchor.constraint(equalTo: actorStackView.bottomAnchor, constant: 24),
             watchNowButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
