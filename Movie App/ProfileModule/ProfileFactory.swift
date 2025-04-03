@@ -8,7 +8,7 @@
 import UIKit
 
 final class ProfileFactory {
- static func makeSettingViewModel() -> UIViewController {
+ static func makeProfileModule() -> UIViewController {
         let presenter = ProfilePresenter()
         let viewController = ProfileViewController(presenter: presenter)
         presenter.setupView(viewController)
