@@ -58,9 +58,8 @@ final class ProfileViewController: UIViewController {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "edit")?.withRenderingMode(.alwaysOriginal)
         imageView.contentMode = .scaleAspectFit
-        
         button.setImage(imageView.image, for: .normal)
-//        button.addTarget(self, action: #selector(changeAvatarButtonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(changeAvatarButtonTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -129,6 +128,18 @@ final class ProfileViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    @objc private func changeAvatarButtonTapped() {
+        let imagePicker = UIImagePickerController()
+        imagePicker.delegate = self
+        imagePicker.allowsEditing = true
+        imagePicker.sourceType = .photoLibrary
+        present(imagePicker, animated: true)
+         presenter.changeAvatarButtonTapped()
+     }
+    
+    @objc private func saveButtonPressed() {
+         presenter.saveButtonPressed()
+     }
     
 }
 

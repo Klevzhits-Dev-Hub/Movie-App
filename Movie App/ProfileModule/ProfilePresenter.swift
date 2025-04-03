@@ -8,6 +8,8 @@
 import UIKit
 
 protocol ProfilePresenterProtocol {
+    func changeAvatarButtonTapped()
+    func saveButtonPressed()
 }
 
 final class ProfilePresenter{
@@ -24,5 +26,12 @@ final class ProfilePresenter{
 
 // MARK: - ProfilePresenterProtocol
 extension ProfilePresenter: ProfilePresenterProtocol {
+    func changeAvatarButtonTapped() {
+        
+    }
+    
+    func saveButtonPressed() {
+        
+    }   
     
 }
