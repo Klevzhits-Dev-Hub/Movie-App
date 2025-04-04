@@ -8,7 +8,7 @@
 import UIKit
 
 protocol SettingViewProtocol: AnyObject {
-    
+    func navigateToProfile()
 }
 
 final class SettingViewController: UIViewController {
@@ -89,7 +89,7 @@ final class SettingViewController: UIViewController {
         let button = UIButton(type: .system)
         let image = UIImage(named: "next")?.withRenderingMode(.alwaysOriginal)
         button.setImage(image, for: .normal)
-        //            button.addTarget(self, action: #selector(nextButtonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(nextButtonTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -173,6 +173,7 @@ final class SettingViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.titleView = titleLabel
         setupView()
         setupConstraints()
     }
@@ -186,10 +187,18 @@ final class SettingViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    @objc private func nextButtonTapped() {
+        presenter.nextButtonTapped()
+    }
 }
 
 // MARK: - SettingViewProtocol
 extension SettingViewController: SettingViewProtocol {
+    func navigateToProfile() {
+        let profileVС = ProfileViewController(presenter: ProfilePresenter())
+        navigationController?.pushViewController(profileVС, animated: true)
+    }
+    
     
 }
 // MARK: - setup View and Constraints
