@@ -1,0 +1,334 @@
+//
+//  MovieDetailViewController.swift
+//  Movie App
+//
+//  Created by Artem Kriukov on 31.03.2025.
+//
+
+import UIKit
+
+final class MovieDetailViewController: UIViewController {
+    
+    // MARK: - Private Properties
+    private let movieDescriptionText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    
+    // MARK: - UI
+    private lazy var scrollView: UIScrollView = {
+        let element = UIScrollView()
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var contentView: UIView = {
+        let element = UIView()
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var movieImageView: UIImageView = {
+        let element = UIImageView()
+        element.image = UIImage(named: "Image")
+        element.contentMode = .scaleAspectFit
+        element.layer.cornerRadius = 16
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var movieDetailStackView: UIStackView = {
+        let element = UIStackView()
+        element.axis = .vertical
+        element.spacing = 16
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var movieNameLabel: UILabel = {
+        let element = UILabel()
+        element.text = "Movie Name"
+        element.font = UIFont(name: Fonts.PlusJakartaSans.bold.rawValue, size: 24)
+        element.textAlignment = .center
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var movieAboutStackView: UIStackView = {
+        let element = UIStackView()
+        element.axis = .horizontal
+        element.spacing = 24
+        element.distribution = .fillProportionally
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var timeLabel: UILabel = {
+        let element = UILabel()
+        element.text = "148 Minutes"
+        element.font = UIFont(name: Fonts.Montserrat.medium.rawValue, size: 12)
+        element.textColor = .gray
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var dataLabel: UILabel = {
+        let element = UILabel()
+        element.text = "17 Sep 2021"
+        element.font = UIFont(name: Fonts.Montserrat.medium.rawValue, size: 12)
+        element.textColor = .gray
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var genreLabel: UILabel = {
+        let element = UILabel()
+        element.text = "Action"
+        element.font = UIFont(name: Fonts.Montserrat.medium.rawValue, size: 12)
+        element.textColor = .gray
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var ratingContainerView: UIView = {
+        let element = UIView()
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var starRatingView: StarRatingView = {
+        let view = StarRatingView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private lazy var movieSummaryStackView: UIStackView = {
+        let element = UIStackView()
+        element.axis = .vertical
+        element.spacing = 16
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var movieDescriptionView: StoryLineView = {
+        let view = StoryLineView(collapsedLines: 6)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private lazy var actorStackView: UIStackView = {
+        let element = UIStackView()
+        element.axis = .vertical
+        element.spacing = 16
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var actorLabel: UILabel = {
+        let element = UILabel()
+        element.text = "Cast and Crew"
+        element.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var actorCollectionContainer: UIView = {
+        let element = UIView()
+        element.translatesAutoresizingMaskIntoConstraints = false
+        element.backgroundColor = .clear
+        element.clipsToBounds = false
+        return element
+    }()
+    
+    private lazy var actorCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.minimumLineSpacing = 20
+        layout.itemSize = CGSize(width: 150, height: 41)
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.backgroundColor = .clear
+        collectionView.dataSource = self
+        collectionView.register(
+            ActorsCollectionViewCell.self,
+            forCellWithReuseIdentifier: ActorsCollectionViewCell.identifier
+        )
+        
+        return collectionView
+    }()
+    
+    private lazy var watchNowButton: UIButton = {
+        let element = UIButton(type: .system)
+        element.setTitle("Watch now", for: .normal)
+        element.setTitleColor(
+            UIColor(red: 254/255, green: 254/255, blue: 254/255, alpha: 1),
+            for: .normal
+        )
+        element.backgroundColor = UIColor(named: "SelectedColor")
+        element.layer.cornerRadius = 24
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    lazy var timeElements = makeStackView(image: UIImage(named: "timeImage"), view: timeLabel)
+    lazy var dataElements = makeStackView(image: UIImage(named: "dataImage"), view: dataLabel )
+    lazy var genreElements = makeStackView(image: UIImage(named: "filmIconImage"), view: genreLabel)
+    
+    // MARK: - Life Circle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = UIColor(named: "BackgroundColor")
+        setupViews()
+        setupConstraints()
+        configureDescription()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        setupShadow()
+    }
+    
+    // MARK: - Private Methods
+    private func configureDescription() {
+        movieDescriptionView.configure(
+            title: "Story Line",
+            description: movieDescriptionText
+        )
+    }
+    
+    private func makeStackView(image: UIImage?, view: UIView) -> UIStackView {
+        let imageView = UIImageView()
+        
+        imageView.image = image
+        
+        imageView.widthAnchor.constraint(equalToConstant: 16).isActive = true
+        imageView.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        
+        let view = UIStackView(arrangedSubviews: [imageView, view])
+        view.axis = .horizontal
+        view.alignment = .center
+        view.spacing = 4
+        return view
+    }
+    
+    private func setupShadow() {
+        actorCollectionContainer.layer.shadowColor = UIColor.black.cgColor
+        actorCollectionContainer.layer.shadowOpacity = 1
+        actorCollectionContainer.layer.shadowRadius = 60
+        
+        let shadowHeight = actorCollectionContainer.bounds.height * 0.5
+        
+        let shadowPath = UIBezierPath()
+        shadowPath.move(to: CGPoint(x: 0, y: actorCollectionContainer.bounds.height - shadowHeight))
+        shadowPath.addLine(to: CGPoint(x: actorCollectionContainer.bounds.width, y: actorCollectionContainer.bounds.height - shadowHeight))
+        shadowPath.addLine(to: CGPoint(x: actorCollectionContainer.bounds.width, y: actorCollectionContainer.bounds.height))
+        shadowPath.addLine(to: CGPoint(x: 0, y: actorCollectionContainer.bounds.height))
+        shadowPath.close()
+        
+        actorCollectionContainer.layer.shadowPath = shadowPath.cgPath
+        actorCollectionContainer.layer.shadowOffset = CGSize(width: 40, height: 0)
+        actorCollectionContainer.layer.shouldRasterize = true
+        actorCollectionContainer.layer.rasterizationScale = UIScreen.main.scale
+    }
+}
+
+// MARK: - UICollectionViewDataSource
+extension MovieDetailViewController: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        3
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = actorCollectionView.dequeueReusableCell(
+            withReuseIdentifier: ActorsCollectionViewCell.identifier,
+            for: indexPath
+        ) as? ActorsCollectionViewCell else {
+            return UICollectionViewCell()
+        }
+        
+        return cell
+    }
+}
+
+// MARK: - Set Views and Setup Constraints
+private extension MovieDetailViewController {
+    
+    func setupViews() {
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        
+        contentView.addSubview(movieImageView)
+        contentView.addSubview(movieDetailStackView)
+        contentView.addSubview(movieSummaryStackView)
+        contentView.addSubview(actorStackView)
+        contentView.addSubview(watchNowButton)
+        
+        movieDetailStackView.addArrangedSubview(movieNameLabel)
+        movieDetailStackView.addArrangedSubview(movieAboutStackView)
+        movieDetailStackView.addArrangedSubview(ratingContainerView)
+        
+        movieAboutStackView.addArrangedSubview(dataElements)
+        movieAboutStackView.addArrangedSubview(timeElements)
+        movieAboutStackView.addArrangedSubview(genreElements)
+        
+        ratingContainerView.addSubview(starRatingView)
+        
+        movieSummaryStackView.addArrangedSubview(movieDescriptionView)
+        
+        actorStackView.addArrangedSubview(actorLabel)
+        actorStackView.addArrangedSubview(actorCollectionContainer)
+        actorCollectionContainer.addSubview(actorCollectionView)
+    }
+    
+    func setupConstraints() {
+        NSLayoutConstraint.activate([
+            
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            
+            movieImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
+            movieImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            movieImageView.heightAnchor.constraint(equalToConstant: 300),
+            movieImageView.widthAnchor.constraint(equalToConstant: 224),
+            
+            movieDetailStackView.topAnchor.constraint(equalTo: movieImageView.bottomAnchor, constant: 24),
+            movieDetailStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 42),
+            movieDetailStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -42),
+            
+            dataElements.heightAnchor.constraint(equalToConstant: 19),
+            timeElements.heightAnchor.constraint(equalToConstant: 19),
+            genreElements.heightAnchor.constraint(equalToConstant: 19),
+            
+            ratingContainerView.heightAnchor.constraint(equalToConstant: 16),
+            starRatingView.centerXAnchor.constraint(equalTo: ratingContainerView.centerXAnchor),
+            starRatingView.centerYAnchor.constraint(equalTo: ratingContainerView.centerYAnchor),
+            
+            movieSummaryStackView.topAnchor.constraint(equalTo: movieDetailStackView.bottomAnchor, constant: 32),
+            movieSummaryStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            movieSummaryStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
+            
+            actorStackView.topAnchor.constraint(equalTo: movieSummaryStackView.bottomAnchor, constant: 24),
+            actorStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            actorStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
+            actorCollectionView.topAnchor.constraint(equalTo: actorCollectionContainer.topAnchor),
+            actorCollectionView.leadingAnchor.constraint(equalTo: actorCollectionContainer.leadingAnchor),
+            actorCollectionView.trailingAnchor.constraint(equalTo: actorCollectionContainer.trailingAnchor),
+            actorCollectionView.bottomAnchor.constraint(equalTo: actorCollectionContainer.bottomAnchor),
+
+            actorCollectionContainer.heightAnchor.constraint(equalToConstant: 41),
+            
+            watchNowButton.topAnchor.constraint(equalTo: actorStackView.bottomAnchor, constant: 24),
+            watchNowButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            watchNowButton.widthAnchor.constraint(equalToConstant: 181),
+            watchNowButton.heightAnchor.constraint(equalToConstant: 56),
+            watchNowButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -22)
+        ])
+    }
+}
