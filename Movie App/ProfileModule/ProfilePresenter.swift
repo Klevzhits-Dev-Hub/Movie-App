@@ -8,8 +8,9 @@
 import UIKit
 
 protocol ProfilePresenterProtocol {
-    func changeAvatarButtonTapped()
+    func changeAvatarButtonTapped(option: EditAvatarOption)
     func saveButtonPressed()
+    func backButtonPressed()
 }
 
 final class ProfilePresenter{
@@ -26,12 +27,20 @@ final class ProfilePresenter{
 
 // MARK: - ProfilePresenterProtocol
 extension ProfilePresenter: ProfilePresenterProtocol {
-    func changeAvatarButtonTapped() {
-        
+    func changeAvatarButtonTapped(option: EditAvatarOption) {
+        switch option {
+        case .photoLibrary:
+            // Логика для выбора изображения из фотоальбома
+            print("Photo Library Selected")
+        case .camera:
+            // Логика для выбора изображения с камеры
+            print("Camera Selected")
+        }
     }
-    
-    func saveButtonPressed() {
-        
-    }   
-    
-}
+        func saveButtonPressed() {
+            
+        }
+        func backButtonPressed() {
+        }
+    }
+

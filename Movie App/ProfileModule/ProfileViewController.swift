@@ -8,7 +8,6 @@
 import UIKit
 
 protocol ProfileViewProtocol: AnyObject {
-    
 }
 
 final class ProfileViewController: UIViewController {
@@ -25,10 +24,16 @@ final class ProfileViewController: UIViewController {
         return element
     }()
     
+    let visualEffectView: UIVisualEffectView = {
+        let blur = UIBlurEffect(style: UIBlurEffect.Style.systemChromeMaterialDark)
+        let blurView = UIVisualEffectView(effect: blur)
+        return blurView
+    }()
+    
     private lazy var backButton: UIButton = {
         let button = UIButton(type: .system)
         button.setBackgroundImage(UIImage(named: "arrow.left"), for: .normal)
-        //        button.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(backButtonPressed), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -102,7 +107,6 @@ final class ProfileViewController: UIViewController {
     private lazy var saveButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Save Changes", for: .normal)
-        
         button.titleLabel?.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
         button.setTitleColor( .grayText, for: .normal)
         button.layer.cornerRadius = 24
@@ -117,6 +121,7 @@ final class ProfileViewController: UIViewController {
         super.viewDidLoad()
         setupView()
         setupConstraints()
+        navigationItem.titleView = titleLabel
     }
     
     init(presenter: ProfilePresenterProtocol) {
@@ -128,18 +133,26 @@ final class ProfileViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    @objc private func changeAvatarButtonTapped() {
-        let imagePicker = UIImagePickerController()
-        imagePicker.delegate = self
-        imagePicker.allowsEditing = true
-        imagePicker.sourceType = .photoLibrary
-        present(imagePicker, animated: true)
-         presenter.changeAvatarButtonTapped()
-     }
     
+    @objc private func changeAvatarButtonTapped() {
+        let editAvatarVC = EditAvatarViewController()
+        editAvatarVC.delegate = self
+        present(editAvatarVC, animated: true, completion: nil)
+    }
+    private func showImagePicker(sourceType: UIImagePickerController.SourceType) {
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.sourceType = sourceType
+        imagePickerController.delegate = self
+        imagePickerController.allowsEditing = true // Разрешаем редактирование изображения
+        present(imagePickerController, animated: true, completion: nil)
+    }
     @objc private func saveButtonPressed() {
-         presenter.saveButtonPressed()
-     }
+        presenter.saveButtonPressed()
+    }
+    
+    @objc private func backButtonPressed() {
+        presenter.backButtonPressed()
+    }
     
 }
 
@@ -176,7 +189,7 @@ private extension ProfileViewController {
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             
-            profileImageView.topAnchor.constraint(equalTo: scrollContentGuide.topAnchor),
+            profileImageView.topAnchor.constraint(equalTo: scrollContentGuide.topAnchor, constant: 37),
             profileImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             profileImageView.widthAnchor.constraint(equalToConstant: 100),
             profileImageView.heightAnchor.constraint(equalToConstant: 100),
@@ -246,28 +259,61 @@ private extension ProfileViewController {
         ])
     }
 }
-
+// MARK: - UIImagePickerControllerDelegate Methods
 extension ProfileViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        if let image = info[UIImagePickerController.InfoKey(rawValue: "UIImagePickerControllerEditedImage")] as? UIImage {
-            profileImageView.image = image
-            profileImageView.layer.cornerRadius = 48
-            profileImageView.contentMode = .scaleAspectFill
-            profileImageView.clipsToBounds = true
-            
-            // Здесь  сохранять изображение
-        }
-        picker.dismiss(animated: true, completion: nil)
+    public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        print("imagePickerControllerDidCancel")
+        pickerController(picker, didSelect: nil)
     }
     
-    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        dismiss(animated: true, completion: nil)
+    public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        print("imagePickerController didFinishPickingMediaWithInfo")
+        guard let image = info[.editedImage] as? UIImage ?? info[.originalImage] as? UIImage else {
+            print("No image selected")
+            pickerController(picker, didSelect: nil)
+            return
+        }
+        print("Selected image: \(image)")
+        pickerController(picker, didSelect: image)
+    }
+    
+    private func pickerController(_ picker: UIImagePickerController, didSelect image: UIImage?) {
+        dismiss(animated: true) {
+            if let selectedImage = image {
+                self.profileImageView.image = selectedImage
+                self.profileImageView.layer.cornerRadius = 49
+                self.profileImageView.contentMode = .scaleAspectFill
+                self.profileImageView.clipsToBounds = true
+            }
+        }
     }
 }
 
 // MARK: - ProfileViewProtocol
 extension ProfileViewController: ProfileViewProtocol {
-    
+    func backButtonTapped() {
+        
+    }
 }
 
+// MARK: - EditAvatarViewControllerDelegate
+extension ProfileViewController: EditAvatarViewControllerDelegate {
+    func editAvatarViewController(_ viewController: EditAvatarViewController, didSelectOption option: EditAvatarOption) {
+        presenter.changeAvatarButtonTapped(option: option)
+        switch option {
+        case .camera:
+            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                showImagePicker(sourceType: .camera)
+            }
+        case .photoLibrary:
+            if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
+                showImagePicker(sourceType: .photoLibrary)
+            }
+        }
+    }
+    
+    func editAvatarViewControllerDidCancel(_ viewController: EditAvatarViewController) {
+        // Обработка отмены
+    }
+}
