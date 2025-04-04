@@ -13,7 +13,7 @@ class WishlistViewController: UIViewController {
         let label = UILabel()
         
         label.text = "Favorites"
-        label.font = UIFont.systemFont(ofSize: 18, weight: .bold)
+        label.font = UIFont(name: Fonts.PlusJakartaSans.extraBold.rawValue, size: 18)
         label.textAlignment = .center
         label.textColor = .black
         
