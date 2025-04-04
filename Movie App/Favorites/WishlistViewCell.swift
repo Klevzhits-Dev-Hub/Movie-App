@@ -24,7 +24,7 @@ class WishlistViewCell: UICollectionViewCell {
         let label = UILabel()
         
         label.text = "Luck"
-        label.font = UIFont.systemFont(ofSize: 18, weight: .bold)
+        label.font = UIFont(name: Fonts.PlusJakartaSans.extraBold.rawValue, size: 18)
         label.numberOfLines = 2
         
         return label
@@ -42,7 +42,7 @@ class WishlistViewCell: UICollectionViewCell {
     private lazy var timeLabel: UILabel = {
         let label = UILabel()
         label.text = "148 Minutes"
-        label.font = UIFont.systemFont(ofSize: 12)
+        label.font = UIFont(name: Fonts.Montserrat.medium.rawValue, size: 12)
         label.textColor = .gray
         return label
     }()
@@ -50,7 +50,7 @@ class WishlistViewCell: UICollectionViewCell {
     private lazy var dataLabel: UILabel = {
         let label = UILabel()
         label.text = "17 Sep 2021"
-        label.font = UIFont.systemFont(ofSize: 12)
+        label.font = UIFont(name: Fonts.Montserrat.medium.rawValue, size: 12)
         label.textColor = .gray
         return label
     }()
@@ -60,10 +60,10 @@ class WishlistViewCell: UICollectionViewCell {
         
         var config = UIButton.Configuration.filled()
         config.title = "Action"
-        config.baseBackgroundColor = .brown
+        config.baseBackgroundColor = .selected
         config.baseForegroundColor = .white
         
-        config.attributedTitle = AttributedString("Action", attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 10, weight: .medium)]))
+        config.attributedTitle = AttributedString("Action", attributes: AttributeContainer([.font: UIFont(name: Fonts.PlusJakartaSans.bold.rawValue, size: 10) ?? UIFont.systemFont(ofSize: 10, weight: .medium)]))
         config.contentInsets = NSDirectionalEdgeInsets(top: 7, leading: 16, bottom: 7, trailing: 16)
         
         button.configuration = config
@@ -96,6 +96,7 @@ class WishlistViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        likeButton.addTarget(self, action: #selector(likeButtonTapped), for: .touchUpInside)
     }
     
     required init?(coder: NSCoder) {
@@ -103,6 +104,11 @@ class WishlistViewCell: UICollectionViewCell {
     }
     
     // MARK: - Private Methods
+    @objc private func likeButtonTapped() {
+        let isLiked = likeButton.currentImage == UIImage(named: "likeButton")
+        likeButton.setImage(UIImage(named: isLiked ? "emptyLikeButton" : "likeButton"), for: .normal)
+    }
+    
     func makeStackView(image: UIImage?, view: UIView) -> UIStackView {
         let imageView = UIImageView()
         
