@@ -30,7 +30,7 @@ final class SettingPresenter{
 // MARK: - SettingPresenterProtocol
 extension SettingPresenter: SettingPresenterProtocol {
     func nextButtonTapped() {
-        
+        view?.navigateToProfile()
     }
     
     func changePasswordButtonTapped() {
