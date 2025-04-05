@@ -7,58 +7,152 @@
 import Foundation
 import CoreData
 
-final class CoreDataManager {
+@objc(MovieEntity)
+public class MovieEntity: NSManagedObject {
+    @NSManaged public var id: Int32
+    @NSManaged public var title: String
+    @NSManaged public var posterURL: String?
+    @NSManaged public var duration: Int32
+    @NSManaged public var releaseDate: Date?
+    @NSManaged public var genre: String?
+    @NSManaged public var isWatched: Bool
+    @NSManaged public var isLiked: Bool
+}
+
+extension MovieEntity {
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<MovieEntity> {
+        return NSFetchRequest<MovieEntity>(entityName: "MovieEntity")
+    }
+}
+
+class CoreDataManager {
     static let shared = CoreDataManager()
     
-    // Контейнер для работы с Core Data
-    private lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "MovieModel") // Имя должно совпадать с вашим .xcdatamodeld!
+    private init() {}
+    
+    lazy var persistentContainer: NSPersistentContainer = {
+        let container = NSPersistentContainer(name: "MovieModel")
         container.loadPersistentStores { _, error in
             if let error = error as NSError? {
-                fatalError("Ошибка загрузки Core Data: \(error), \(error.userInfo)")
+                fatalError("Unresolved error \(error), \(error.userInfo)")
             }
         }
         return container
     }()
     
-    // Контекст для сохранения/изменения данных
     var context: NSManagedObjectContext {
-        return persistentContainer.viewContext
+        persistentContainer.viewContext
     }
     
-    // Сохранение контекста
+    // MARK: - Save Context
     func saveContext() {
-        guard context.hasChanges else { return }
-        do {
-            try context.save()
-        } catch {
-            print("Ошибка сохранения: \(error.localizedDescription)")
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+                let nserror = error as NSError
+                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+            }
         }
     }
     
-    func addMovie(_ movie: Movie, isFavorite: Bool, isWatched: Bool) {
-        let entity = MovieEntity(context: context)
-        entity.id = Int64(movie.id)
-        entity.name = movie.name ?? "No name"
-        entity.posterURL = movie.poster?.url ?? ""
-        entity.premiere = movie.premiere?.world ?? ""
-        entity.genre = ""
-        entity.durationString = movie.durationString
-        entity.isFavorite = isFavorite
-        entity.isWatched = isWatched
-        saveContext()
+    // MARK: - Movie Operations
+    func markAsWatched(movie: Movie) {
+            let fetchRequest: NSFetchRequest<MovieEntity> = MovieEntity.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "id == %d", Int32(movie.id))
+            
+            do {
+                let existingMovies = try context.fetch(fetchRequest)
+                
+                if let existingMovie = existingMovies.first {
+                    if !existingMovie.isWatched {
+                        existingMovie.isWatched = true
+                        saveContext()
+                    }
+                } else {
+                    let newMovie = MovieEntity(context: context)
+                    newMovie.id = Int32(movie.id)
+                    newMovie.title = movie.name ?? movie.alternativeName ?? "Unknown"
+                    newMovie.posterURL = movie.poster?.url
+                    newMovie.duration = Int32(movie.movieLength ?? 0)
+                    newMovie.releaseDate = dateFromString(movie.premiere?.world)
+                    newMovie.genre = movie.genres?.first?.name
+                    newMovie.isWatched = true
+                    newMovie.isLiked = false
+                    saveContext()
+                }
+            } catch {
+                print("Error: \(error)")
+            }
+        }
+    
+    func toggleLike(movie: Movie) {
+            let fetchRequest: NSFetchRequest<MovieEntity> = MovieEntity.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "id == %d", Int32(movie.id))
+            
+            do {
+                let existingMovies = try context.fetch(fetchRequest)
+                
+                if let existingMovie = existingMovies.first {
+                    if existingMovie.isWatched {
+                        // Если просмотрен - просто инвертируем лайк
+                        existingMovie.isLiked.toggle()
+                        saveContext()
+                    } else {
+                        // Если не просмотрен - при снятии лайка удаляем
+                        if existingMovie.isLiked {
+                            context.delete(existingMovie)
+                            saveContext()
+                        }
+                    }
+                } else {
+                    // Добавляем новый лайк
+                    let newMovie = MovieEntity(context: context)
+                    newMovie.id = Int32(movie.id)
+                    newMovie.title = movie.name ?? movie.alternativeName ?? "Unknown"
+                    newMovie.posterURL = movie.poster?.url
+                    newMovie.duration = Int32(movie.movieLength ?? 0)
+                    newMovie.releaseDate = dateFromString(movie.premiere?.world)
+                    newMovie.genre = movie.genres?.first?.name
+                    newMovie.isWatched = false
+                    newMovie.isLiked = true
+                    saveContext()
+                }
+            } catch {
+                print("Error: \(error)")
+            }
+        }
+    
+    // MARK: - Helpers
+    private func dateFromString(_ dateString: String?) -> Date? {
+        guard let dateString = dateString else { return nil }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.date(from: dateString)
     }
     
-    func isMovieInDatabase(id: Int) -> Bool {
+    // MARK: - Fetch Methods
+    func getWatchedMovies() -> [MovieEntity] {
         let request: NSFetchRequest<MovieEntity> = MovieEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "id == %d", id)
-        return (try? context.count(for: request)) ?? 0 > 0
+        request.predicate = NSPredicate(format: "isWatched == YES")
+        
+        do {
+            return try context.fetch(request)
+        } catch {
+            print("Error fetching watched movies: \(error)")
+            return []
+        }
     }
-
-    func fetchFavorites() -> [MovieEntity] {
+    
+    func getLikedMovies() -> [MovieEntity] {
         let request: NSFetchRequest<MovieEntity> = MovieEntity.fetchRequest()
-        request.predicate = NSPredicate(format: "isFavorite == true")
-        return (try? context.fetch(request)) ?? []
+        request.predicate = NSPredicate(format: "isLiked == YES")
+        
+        do {
+            return try context.fetch(request)
+        } catch {
+            print("Error fetching liked movies: \(error)")
+            return []
+        }
     }
-
 }
