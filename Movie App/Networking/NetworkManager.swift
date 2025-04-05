@@ -44,6 +44,25 @@ final class NetworkManager {
         performRequest(urlString: urlString, completion: completion)
     }
     
+    func fetchGenres(completion: @escaping (Result<[Genre], Error>) -> Void) {
+        let urlString = "https://api.kinopoisk.dev/v1/movie/possible-values-by-field"
+        let queryItems = [URLQueryItem(name: "field", value: "genres.name")]
+        
+        guard var urlComponents = URLComponents(string: urlString) else {
+            completion(.failure(NetworkError.invalidURL))
+            return
+        }
+        
+        urlComponents.queryItems = queryItems
+        
+        guard let finalURL = urlComponents.url else {
+            completion(.failure(NetworkError.invalidURL))
+            return
+        }
+        
+        performRequest(urlString: finalURL.absoluteString, completion: completion)
+    }
+    
     func fetchMovieDetails(id: Int, completion: @escaping (Result<Movie, Error>) -> Void) {
         let urlString = "\(baseURL)movie/\(id)"
         performRequest(urlString: urlString, completion: completion)
