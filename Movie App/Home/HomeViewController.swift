@@ -10,9 +10,9 @@ import UIKit
 final class HomeViewController: UICollectionViewController {
     let cellId = "cell"
     let categoryCell = "categoryCell"
-    let movieCell = "movieCell"
     
     let categories = ["All", "Action", "Adventure", "Drama", "Comedy", "Biography"]
+    var popularMovies = [Movie]()
         
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,7 +21,7 @@ final class HomeViewController: UICollectionViewController {
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: CarouselHeaderView.reuseIdentifier)
         collectionView.register(CategoryCell.self, forCellWithReuseIdentifier: categoryCell)
-        collectionView.register(BoxOfficeMovieCell.self, forCellWithReuseIdentifier: movieCell)
+        collectionView.register(BoxOfficeMovieCell.self, forCellWithReuseIdentifier: BoxOfficeMovieCell.identifier)
         collectionView.register(CategoryHeaderView.self, forSupplementaryViewOfKind: HomeViewController.categoryHeaderId, withReuseIdentifier: headerId)
         collectionView.register(BoxOfficeHeaderView.self, forSupplementaryViewOfKind: HomeViewController.boxOfficeHeaderId, withReuseIdentifier: boxOfficeId)
         
@@ -33,6 +33,18 @@ final class HomeViewController: UICollectionViewController {
         navigationController?.navigationBar.tintColor = .white
         
         collectionView.contentInset.top = 25
+        
+        NetworkManager.shared.fetchPopularMovies { result in
+            switch result {
+            case .success(let movieResponse):
+                self.popularMovies = movieResponse.docs
+                DispatchQueue.main.async {
+                    self.collectionView.reloadData()
+                }
+            case .failure(let error):
+                print("Error fetching movies: \(error)")
+            }
+        }
         
     }
         
@@ -160,7 +172,7 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
         } else if section == 1 {
             return categories.count
         }
-        return 10
+        return popularMovies.count
     }
     
     
@@ -175,7 +187,9 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
             cell.configure(with: categories[indexPath.item])
             return cell
         }
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: movieCell, for: indexPath)
+        let movie = popularMovies[indexPath.item]
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: BoxOfficeMovieCell.identifier, for: indexPath) as! BoxOfficeMovieCell
+        cell.configure(with: movie)
         return cell
     }
     

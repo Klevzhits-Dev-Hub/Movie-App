@@ -9,11 +9,10 @@ import UIKit
 
 class BoxOfficeMovieCell: UICollectionViewCell {
     
-    let identifier = "BoxOfficeMovieCell"
+    static let identifier = "BoxOfficeMovieCell"
     
     let movieImageView: UIImageView = {
         let iv = UIImageView()
-        iv.image = UIImage(named: "movieMock")
         iv.layer.cornerRadius = 15
         iv.clipsToBounds = true
         iv.translatesAutoresizingMaskIntoConstraints = false
@@ -23,6 +22,7 @@ class BoxOfficeMovieCell: UICollectionViewCell {
     let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Name of the movie"
+        label.numberOfLines = 0
         label.textColor = .black
         label.font = .boldSystemFont(ofSize: 20)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -55,7 +55,7 @@ class BoxOfficeMovieCell: UICollectionViewCell {
     
     let durationLabel: UILabel = {
         let label = UILabel()
-        label.text = "148 minutes"
+        label.text = ""
         label.textColor = .gray
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -63,7 +63,7 @@ class BoxOfficeMovieCell: UICollectionViewCell {
     
     let ratingLabel: UILabel = {
         let label = UILabel()
-        label.text = "4.4"
+        label.text = "0.0"
         label.textColor = .systemYellow
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -71,7 +71,7 @@ class BoxOfficeMovieCell: UICollectionViewCell {
     
     let rewiewNumberLabel: UILabel = {
         let label = UILabel()
-        label.text = "(55)"
+        label.text = "(0)"
         label.textColor = .gray
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -144,6 +144,11 @@ class BoxOfficeMovieCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        movieImageView.image = UIImage(named: "moviePlaceHolder")
+    }
+    
     func setConstraints() {
         NSLayoutConstraint.activate([
             horizontalStackView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -166,7 +171,25 @@ class BoxOfficeMovieCell: UICollectionViewCell {
         
     }
     
-    func configure(with category: String) {
+    func configure(with movie: Movie) {
+        titleLabel.text = movie.name
+        genreLabel.text = (movie.genres?[0].name ?? "").capitalized
+        durationLabel.text = movie.durationString
         
+        if let rating = movie.rating?.kp, rating > 1 {
+            ratingLabel.text = String(format: "%.1f", rating)
+        }
+        
+        if let votes = movie.votes?.kp {
+            rewiewNumberLabel.text = "(\(votes))"
+        }
+        
+        if let urlString = movie.poster?.url {
+            ImageLoader.shared.loadImage(from: urlString) { [weak self] img in
+                DispatchQueue.main.async {
+                    self?.movieImageView.image = img
+                }
+            }
+        }
     }
 }
