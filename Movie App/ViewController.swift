@@ -46,6 +46,14 @@ class ViewController: UIViewController {
                 print("Error: \(error)")
             }
         }
+        NetworkManager.shared.fetchGenres { [weak self] result in
+            switch result {
+            case .success(let genres):
+                print(genres)
+            case .failure(let error):
+                print("Error: \(error)")
+            }
+        }
     }
 
 
