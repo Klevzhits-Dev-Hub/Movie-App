@@ -7,33 +7,29 @@
 
 import UIKit
 
-final class HomeViewController: UICollectionViewController {
+protocol HomeViewProtocol: AnyObject {
+    func showMovies(_ movies: [Movie])
+}
+
+final class HomeViewController: UICollectionViewController, HomeViewProtocol {
+    //let presenter: HomePresenterProtocol
+    
+    let headerId = "headerId"
+    static let categoryHeaderId = "categoryHeaderId"
+    let boxOfficeId = "boxOfficeId"
+    static let boxOfficeHeaderId = "boxOfficeHeaderId"
     let cellId = "cell"
-    let categoryCell = "categoryCell"
     
     let categories = ["All", "Action", "Adventure", "Drama", "Comedy", "Biography"]
     var popularMovies = [Movie]()
         
     override func viewDidLoad() {
         super.viewDidLoad()
-        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: cellId)
-        collectionView.register(CarouselHeaderView.self,
-                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-                                withReuseIdentifier: CarouselHeaderView.reuseIdentifier)
-        collectionView.register(CategoryCell.self, forCellWithReuseIdentifier: categoryCell)
-        collectionView.register(BoxOfficeMovieCell.self, forCellWithReuseIdentifier: BoxOfficeMovieCell.identifier)
-        collectionView.register(CategoryHeaderView.self, forSupplementaryViewOfKind: HomeViewController.categoryHeaderId, withReuseIdentifier: headerId)
-        collectionView.register(BoxOfficeHeaderView.self, forSupplementaryViewOfKind: HomeViewController.boxOfficeHeaderId, withReuseIdentifier: boxOfficeId)
-        
         setupNavigationBar()
         setupLargeNavBar()
+        setupCollectionVIew()
+        //presenter.viewDidLoad()
 
-        navigationController?.navigationBar.prefersLargeTitles = false
-        navigationController?.navigationBar.barTintColor = .black
-        navigationController?.navigationBar.tintColor = .white
-        
-        collectionView.contentInset.top = 25
-        
         NetworkManager.shared.fetchPopularMovies { result in
             switch result {
             case .success(let movieResponse):
@@ -45,9 +41,13 @@ final class HomeViewController: UICollectionViewController {
                 print("Error fetching movies: \(error)")
             }
         }
-        
     }
         
+//    init(presenter: HomePresenterProtocol) {
+//        self.presenter = presenter
+//        super.init(collectionViewLayout: HomeViewController.createLayout())
+//    }
+    
     init() {
         super.init(collectionViewLayout: HomeViewController.createLayout())
     }
@@ -55,19 +55,136 @@ final class HomeViewController: UICollectionViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+}
+
+// MARK: - Protocol Methods
+extension HomeViewController {
+    func showMovies(_ movies: [Movie]) {
+        self.popularMovies = movies
+        DispatchQueue.main.async {
+            self.collectionView.reloadData()
+        }
+    }
+}
+
+// MARK: - CollectionVIew Settings
+extension HomeViewController {
+    func setupCollectionVIew() {
+        collectionView.register(CarouselHeaderView.self,
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                                withReuseIdentifier: CarouselHeaderView.reuseIdentifier)
+        collectionView.register(CategoryCell.self, forCellWithReuseIdentifier: CategoryCell.identifier)
+        collectionView.register(BoxOfficeMovieCell.self, forCellWithReuseIdentifier: BoxOfficeMovieCell.identifier)
+        collectionView.register(CategoryHeaderView.self, forSupplementaryViewOfKind: HomeViewController.categoryHeaderId, withReuseIdentifier: headerId)
+        collectionView.register(BoxOfficeHeaderView.self, forSupplementaryViewOfKind: HomeViewController.boxOfficeHeaderId, withReuseIdentifier: boxOfficeId)
+    }
     
-    func updateVisibleCellsColor() {
-        for cell in collectionView.visibleCells {
-            cell.backgroundColor = .green
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return .init(width: view.frame.width, height: 250)
+    }
+    
+    
+    static func createLayout() -> UICollectionViewCompositionalLayout {
+        return UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
+            return createSection(for: sectionIndex, layoutEnvironment: layoutEnvironment)
         }
     }
     
-    let headerId = "headerId"
-    static let categoryHeaderId = "categoryHeaderId"
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
+        3
+    }
     
-    let boxOfficeId = "boxOfficeId"
-    static let boxOfficeHeaderId = "boxOfficeHeaderId"
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        if section == 0 {
+            return 8
+        } else if section == 1 {
+            return categories.count
+        }
+        return popularMovies.count
+    }
+}
+
+// MARK: - Cells & Sections
+extension HomeViewController: UICollectionViewDelegateFlowLayout {
+
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if indexPath.section == 0 {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath)
+            cell.backgroundColor = .lightGray
+            
+            return cell
+        } else if indexPath.section == 1 {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CategoryCell.identifier, for: indexPath) as! CategoryCell
+            cell.configure(with: categories[indexPath.item])
+            return cell
+        }
+        let movie = popularMovies[indexPath.item]
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: BoxOfficeMovieCell.identifier, for: indexPath) as! BoxOfficeMovieCell
+        cell.configure(with: movie)
+        return cell
+    }
     
+    private static func createSection(for sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? {
+        if sectionIndex == 0 {
+            let item = NSCollectionLayoutItem(
+                        layoutSize: NSCollectionLayoutSize(
+                            widthDimension: .fractionalWidth(1),
+                            heightDimension: .absolute(0)
+                        )
+                    )
+
+                    let group = NSCollectionLayoutGroup.vertical(
+                        layoutSize: NSCollectionLayoutSize(
+                            widthDimension: .fractionalWidth(1),
+                            heightDimension: .absolute(0)
+                        ),
+                        subitems: [item]
+                    )
+
+                    let section = NSCollectionLayoutSection(group: group)
+    
+                    section.boundarySupplementaryItems = [
+                        NSCollectionLayoutBoundarySupplementaryItem(
+                            layoutSize: NSCollectionLayoutSize(
+                                widthDimension: .fractionalWidth(1),
+                                heightDimension: .absolute(300)
+                            ),
+                            elementKind: UICollectionView.elementKindSectionHeader,
+                            alignment: .top
+                        )
+                    ]
+                    return section
+        
+        } else if sectionIndex == 1 {
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .estimated(100), heightDimension: .absolute(60)))
+            item.contentInsets.bottom = 16
+        
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(70)), subitems: [item])
+            
+            group.interItemSpacing = .fixed(15)
+            
+            let section = NSCollectionLayoutSection(group: group)
+            section.orthogonalScrollingBehavior = .continuous
+            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0)
+            section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: categoryHeaderId, alignment: .topLeading)]
+            return section
+            
+        } else {
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(150)))
+            item.contentInsets.bottom = 16
+        
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(150 * 5 + 16 * 4)), subitems: [item])
+            let section = NSCollectionLayoutSection(group: group)
+            section.contentInsets.leading = 20
+            section.contentInsets.trailing = 20
+            section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: boxOfficeHeaderId, alignment: .topLeading)]
+            return section
+        }
+    }
+}
+
+// MARK: - CollectionVIew Header Settings
+extension HomeViewController {
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == HomeViewController.categoryHeaderId {
             return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerId, for: indexPath)
@@ -81,8 +198,15 @@ final class HomeViewController: UICollectionViewController {
         }
         fatalError("Unexpected element kind")
     }
-    
+}
+
+// MARK: - NavBar Settings
+extension HomeViewController {
     private func setupNavigationBar() {
+        navigationController?.navigationBar.prefersLargeTitles = false
+        navigationController?.navigationBar.barTintColor = .black
+        navigationController?.navigationBar.tintColor = .white
+        
         let titleView = UIView()
         titleView.translatesAutoresizingMaskIntoConstraints = false
         titleView.backgroundColor = .clear
@@ -154,114 +278,18 @@ final class HomeViewController: UICollectionViewController {
             customNavBarBackground.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             customNavBarBackground.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             customNavBarBackground.topAnchor.constraint(equalTo: view.topAnchor),
-            customNavBarBackground.heightAnchor.constraint(equalToConstant: 120) // Высота навбара
+            customNavBarBackground.heightAnchor.constraint(equalToConstant: 120)
         ])
         
         view.bringSubviewToFront(navigationController!.navigationBar)
     }
 }
-
-extension HomeViewController: UICollectionViewDelegateFlowLayout {
-    override func numberOfSections(in collectionView: UICollectionView) -> Int {
-        3
-    }
-    
-    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if section == 0 {
-            return 8
-        } else if section == 1 {
-            return categories.count
-        }
-        return popularMovies.count
-    }
-    
-    
-    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if indexPath.section == 0 {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath)
-            cell.backgroundColor = .lightGray
-            
-            return cell
-        } else if indexPath.section == 1 {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: categoryCell, for: indexPath) as! CategoryCell
-            cell.configure(with: categories[indexPath.item])
-            return cell
-        }
-        let movie = popularMovies[indexPath.item]
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: BoxOfficeMovieCell.identifier, for: indexPath) as! BoxOfficeMovieCell
-        cell.configure(with: movie)
-        return cell
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return .init(width: view.frame.width, height: 250)
-    }
-    
-    
-    static func createLayout() -> UICollectionViewCompositionalLayout {
-        return UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
-            return createSection(for: sectionIndex, layoutEnvironment: layoutEnvironment)
-        }
-    }
-
-    private static func createSection(for sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? {
-        if sectionIndex == 0 {
-            let item = NSCollectionLayoutItem(
-                        layoutSize: NSCollectionLayoutSize(
-                            widthDimension: .fractionalWidth(1),
-                            heightDimension: .absolute(0) // Заменяем ячейки заголовком
-                        )
-                    )
-
-                    let group = NSCollectionLayoutGroup.vertical(
-                        layoutSize: NSCollectionLayoutSize(
-                            widthDimension: .fractionalWidth(1),
-                            heightDimension: .absolute(0) // Нет ячеек, только заголовок
-                        ),
-                        subitems: [item]
-                    )
-
-                    let section = NSCollectionLayoutSection(group: group)
-                    //section.contentInsets.top = 30
-                    section.boundarySupplementaryItems = [
-                        NSCollectionLayoutBoundarySupplementaryItem(
-                            layoutSize: NSCollectionLayoutSize(
-                                widthDimension: .fractionalWidth(1),
-                                heightDimension: .absolute(300) // Высота заголовка с каруселью
-                            ),
-                            elementKind: UICollectionView.elementKindSectionHeader,
-                            alignment: .top
-                        )
-                    ]
-                    return section
-        
-        } else if sectionIndex == 1 {
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .estimated(100), heightDimension: .absolute(60)))
-            //item.contentInsets.trailing = 20
-            item.contentInsets.bottom = 16
-        
-            let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(70)), subitems: [item])
-            
-            group.interItemSpacing = .fixed(15)
-            
-            let section = NSCollectionLayoutSection(group: group)
-            section.orthogonalScrollingBehavior = .continuous
-            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0)
-            section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: categoryHeaderId, alignment: .topLeading)]
-            return section
-            
-        } else {
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(150)))
-            item.contentInsets.bottom = 16
-        
-            let group = NSCollectionLayoutGroup.vertical(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(150 * 5 + 16 * 4)), subitems: [item])
-            let section = NSCollectionLayoutSection(group: group)
-            section.contentInsets.leading = 20
-            section.contentInsets.trailing = 20
-            section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: boxOfficeHeaderId, alignment: .topLeading)]
-            return section
+// MARK: - UI halpers
+extension HomeViewController {
+    func updateVisibleCellsColor() {
+        for cell in collectionView.visibleCells {
+            cell.backgroundColor = .green
         }
     }
 }
-
 
