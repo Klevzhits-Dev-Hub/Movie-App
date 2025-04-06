@@ -57,7 +57,7 @@ final class MovieDetailViewController: UIViewController {
         let element = UIStackView()
         element.axis = .horizontal
         element.spacing = 24
-        element.distribution = .equalSpacing
+        element.distribution = .equalCentering
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()

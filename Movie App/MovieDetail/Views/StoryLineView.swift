@@ -9,10 +9,13 @@ import UIKit
 
 final class StoryLineView: UIView {
     
+    // MARK: - Properties
     private let collapsedLines: Int
     private var isExpanded = false
+    private var isExpandable = false
     private var fullText: String = ""
     
+    // MARK: - UI Components
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
@@ -26,13 +29,15 @@ final class StoryLineView: UIView {
         label.font = UIFont(name: Fonts.PlusJakartaSans.medium.rawValue, size: 14)
         label.textColor = UIColor(named: "GrayText")
         label.isUserInteractionEnabled = true
-        label.lineBreakMode = .byTruncatingTail
+        label.lineBreakMode = .byWordWrapping
         label.translatesAutoresizingMaskIntoConstraints = false
         label.setContentHuggingPriority(.required, for: .vertical)
         label.setContentCompressionResistancePriority(.required, for: .vertical)
         return label
     }()
     
+    
+    // MARK: - Initialization
     init(collapsedLines: Int = 6) {
         self.collapsedLines = collapsedLines
         super.init(frame: .zero)
@@ -45,12 +50,16 @@ final class StoryLineView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Configuration
     func configure(title: String, description: String) {
         titleLabel.text = title
         self.fullText = description
+        
+        calculateExpandability()
         updateTextDisplay()
     }
     
+    // MARK: - Setup
     private func setupViews() {
         addSubview(titleLabel)
         addSubview(descriptionLabel)
@@ -74,35 +83,31 @@ final class StoryLineView: UIView {
         descriptionLabel.addGestureRecognizer(tapGesture)
     }
     
+    // MARK: - Actions
     @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
-        guard let text = descriptionLabel.text else { return }
+        guard isExpandable else { return }
         
-        let trailingText = isExpanded ? TrailingContent.readless.text : TrailingContent.readmore.text
-        if let range = text.range(of: trailingText) {
-            let nsRange = NSRange(range, in: text)
-            let location = gesture.location(in: descriptionLabel)
-            
-            if isTapInRange(location: location, range: nsRange) {
-                isExpanded.toggle()
-                updateTextDisplay()
-            }
+        isExpanded.toggle()
+        UIView.animate(withDuration: 0.3) {
+            self.updateTextDisplay()
+            self.layoutIfNeeded()
         }
     }
     
-    private func isTapInRange(location: CGPoint, range: NSRange) -> Bool {
-        guard let attributedText = descriptionLabel.attributedText else { return false }
+    // MARK: - Text Display Logic
+    private func calculateExpandability() {
+        let testLabel = UILabel()
+        testLabel.font = descriptionLabel.font
+        testLabel.numberOfLines = 0
+        testLabel.text = fullText
         
-        let layoutManager = NSLayoutManager()
-        let textContainer = NSTextContainer(size: descriptionLabel.bounds.size)
-        let textStorage = NSTextStorage(attributedString: attributedText)
+        let maxWidth = bounds.width > 0 ? bounds.width : UIScreen.main.bounds.width - 32
+        let requiredHeight = testLabel.sizeThatFits(
+            CGSize(width: maxWidth, height: .greatestFiniteMagnitude)
+        ).height
         
-        layoutManager.addTextContainer(textContainer)
-        textStorage.addLayoutManager(layoutManager)
-        
-        let glyphIndex = layoutManager.glyphIndex(for: location, in: textContainer)
-        let characterIndex = layoutManager.characterIndexForGlyph(at: glyphIndex)
-        
-        return NSLocationInRange(characterIndex, range)
+        let collapsedHeight = descriptionLabel.font.lineHeight * CGFloat(collapsedLines)
+        isExpandable = requiredHeight > collapsedHeight
     }
     
     private func updateTextDisplay() {
@@ -114,56 +119,63 @@ final class StoryLineView: UIView {
     }
     
     private func showFullText() {
-        let trailing = TrailingContent.readless
-        let fullString = fullText + trailing.text
-        let attributedString = NSMutableAttributedString(string: fullString)
-        
-        if let range = fullString.range(of: trailing.text) {
-            let nsRange = NSRange(range, in: fullString)
-            attributedString.addAttribute(.foregroundColor, value: trailing.color, range: nsRange)
-        }
-        
         descriptionLabel.numberOfLines = 0
-        descriptionLabel.attributedText = attributedString
+        descriptionLabel.text = fullText
     }
     
     private func showCollapsedText() {
-        DispatchQueue.main.async {
-            let trailing = TrailingContent.readmore
-            let maxLines = self.collapsedLines
-            
-            let tempLabel = UILabel()
-            tempLabel.font = self.descriptionLabel.font
-            tempLabel.numberOfLines = maxLines
-            tempLabel.lineBreakMode = .byTruncatingTail
-            tempLabel.frame.size.width = self.descriptionLabel.bounds.width
-            
-            let avgCharsPerLine = Int(self.descriptionLabel.bounds.width / 7)
-            let maxChars = avgCharsPerLine * maxLines
-            
-            let truncatedText = String(self.fullText.prefix(maxChars)) + trailing.text
-            tempLabel.text = truncatedText
-            
-            let textSize = tempLabel.sizeThatFits(CGSize(width: tempLabel.bounds.width, height: .greatestFiniteMagnitude))
-            let lineHeight = self.descriptionLabel.font.lineHeight
-            let maxHeight = lineHeight * CGFloat(maxLines)
-            
-            let finalText: String
-            if textSize.height <= maxHeight {
-                finalText = truncatedText
-            } else {
-                let adjustedChars = Int(Double(maxChars) * 0.9)
-                finalText = String(self.fullText.prefix(adjustedChars)) + trailing.text
-            }
-            
-            let attributedString = NSMutableAttributedString(string: finalText)
-            if let range = finalText.range(of: trailing.text) {
-                let nsRange = NSRange(range, in: finalText)
-                attributedString.addAttribute(.foregroundColor, value: trailing.color, range: nsRange)
-            }
-            
-            self.descriptionLabel.numberOfLines = maxLines
-            self.descriptionLabel.attributedText = attributedString
+        guard isExpandable else {
+            descriptionLabel.numberOfLines = 0
+            descriptionLabel.text = fullText
+            return
         }
+        
+        let trailing = TrailingContent.readmore
+        let maxLines = self.collapsedLines
+        
+        // Create full attributed string
+        let attributedString = NSMutableAttributedString(
+            string: fullText,
+            attributes: [.font: descriptionLabel.font!]
+        )
+        
+        // Add "Show more" at the end
+        let readMoreString = NSAttributedString(
+            string: trailing.text,
+            attributes: [.foregroundColor: trailing.color]
+        )
+        attributedString.append(readMoreString)
+        
+        // Calculate text container
+        let textStorage = NSTextStorage(attributedString: attributedString)
+        let textContainer = NSTextContainer(size: CGSize(
+            width: descriptionLabel.bounds.width,
+            height: .greatestFiniteMagnitude
+        ))
+        let layoutManager = NSLayoutManager()
+        layoutManager.addTextContainer(textContainer)
+        textStorage.addLayoutManager(layoutManager)
+        
+        // Find the truncation point
+        var lineCount = 0
+        var index = 0
+        var range = NSRange(location: 0, length: 0)
+        
+        while index < layoutManager.numberOfGlyphs && lineCount < maxLines {
+            layoutManager.lineFragmentRect(forGlyphAt: index, effectiveRange: &range)
+            index = NSMaxRange(range)
+            lineCount += 1
+        }
+        
+        // Create truncated string
+        let truncatedString = NSMutableAttributedString()
+        if range.location > 0 {
+            truncatedString.append(attributedString.attributedSubstring(from: NSRange(location: 0, length: range.location)))
+        }
+        truncatedString.append(readMoreString)
+        
+        // Apply to label
+        descriptionLabel.numberOfLines = maxLines
+        descriptionLabel.attributedText = truncatedString
     }
 }

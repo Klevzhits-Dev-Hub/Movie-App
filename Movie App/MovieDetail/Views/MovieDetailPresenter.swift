@@ -58,7 +58,6 @@ final class MovieDetailPresenter: MovieDetailPresenterProtocol {
     }
     
     private func loadMovieDetails() {
-        print("Loading details for movie ID: \(movieId)")
         networkManager.fetchMovieDetails(id: movieId) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
