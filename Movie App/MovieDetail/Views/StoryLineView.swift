@@ -132,22 +132,18 @@ final class StoryLineView: UIView {
             let trailing = TrailingContent.readmore
             let maxLines = self.collapsedLines
             
-            // 1. Создаем временный лейбл для расчетов
             let tempLabel = UILabel()
             tempLabel.font = self.descriptionLabel.font
             tempLabel.numberOfLines = maxLines
             tempLabel.lineBreakMode = .byTruncatingTail
             tempLabel.frame.size.width = self.descriptionLabel.bounds.width
             
-            // 2. Рассчитываем примерное количество символов для 6 строк
-            let avgCharsPerLine = Int(self.descriptionLabel.bounds.width / 7) // примерная ширина символа
+            let avgCharsPerLine = Int(self.descriptionLabel.bounds.width / 7)
             let maxChars = avgCharsPerLine * maxLines
             
-            // 3. Берем подстроку и добавляем кнопку
             let truncatedText = String(self.fullText.prefix(maxChars)) + trailing.text
             tempLabel.text = truncatedText
             
-            // 4. Проверяем, помещается ли текст
             let textSize = tempLabel.sizeThatFits(CGSize(width: tempLabel.bounds.width, height: .greatestFiniteMagnitude))
             let lineHeight = self.descriptionLabel.font.lineHeight
             let maxHeight = lineHeight * CGFloat(maxLines)
@@ -156,12 +152,10 @@ final class StoryLineView: UIView {
             if textSize.height <= maxHeight {
                 finalText = truncatedText
             } else {
-                // Если не помещается - обрезаем больше
                 let adjustedChars = Int(Double(maxChars) * 0.9)
                 finalText = String(self.fullText.prefix(adjustedChars)) + trailing.text
             }
             
-            // 5. Устанавливаем текст с подсветкой кнопки
             let attributedString = NSMutableAttributedString(string: finalText)
             if let range = finalText.range(of: trailing.text) {
                 let nsRange = NSRange(range, in: finalText)

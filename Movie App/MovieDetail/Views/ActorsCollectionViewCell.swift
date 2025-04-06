@@ -21,6 +21,8 @@ class ActorsCollectionViewCell: UICollectionViewCell {
     private lazy var actorImageView: UIImageView = {
         let element = UIImageView()
         element.image = UIImage(named: "MockActor")
+        element.layer.cornerRadius = 20
+        element.clipsToBounds = true
         element.contentMode = .scaleAspectFill
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
@@ -47,7 +49,7 @@ class ActorsCollectionViewCell: UICollectionViewCell {
     
     private lazy var actorRoleLabel: UILabel = {
         let element = UILabel()
-        element.text = "Actor Role"
+        element.text = "Actor R"
         element.font = UIFont(
             name: Fonts.PlusJakartaSans.medium.rawValue,
             size: 10
@@ -68,6 +70,22 @@ class ActorsCollectionViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func configure(with person: Person) {
+        actorNameLabel.text = person.name ?? person.enName ?? "Unknown"
+        
+        let profession = person.enProfession ?? person.description ?? "Participant"
+        actorRoleLabel.text = profession.capitalized
+        
+        if let photoUrl = person.photo {
+            ImageLoader.shared.loadImage(from: photoUrl) { [weak self] image in
+                DispatchQueue.main.async {
+                    self?.actorImageView.image = image ?? UIImage(named: "MockPerson")
+                }
+            }
+        } else {
+            actorImageView.image = UIImage(named: "MockPerson")
+        }
+    }
     
     func setupViews() {
         addSubview(actorsStackView)
@@ -81,7 +99,8 @@ class ActorsCollectionViewCell: UICollectionViewCell {
     
     func setupConstraints() {
         NSLayoutConstraint.activate([
-            
+            actorImageView.widthAnchor.constraint(equalToConstant: 40),
+            actorImageView.heightAnchor.constraint(equalToConstant: 40),
         ])
     }
 }
