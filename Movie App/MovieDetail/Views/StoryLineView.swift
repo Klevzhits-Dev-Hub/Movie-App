@@ -36,6 +36,15 @@ final class StoryLineView: UIView {
         return label
     }()
     
+    private lazy var readMoreButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.titleLabel?.font = UIFont(name: Fonts.PlusJakartaSans.medium.rawValue, size: 14)
+        button.contentHorizontalAlignment = .left
+        button.addTarget(self, action: #selector(toggleExpand), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
     
     // MARK: - Initialization
     init(collapsedLines: Int = 6) {
@@ -43,7 +52,6 @@ final class StoryLineView: UIView {
         super.init(frame: .zero)
         setupViews()
         setupConstraints()
-        setupGesture()
     }
     
     required init?(coder: NSCoder) {
@@ -54,7 +62,6 @@ final class StoryLineView: UIView {
     func configure(title: String, description: String) {
         titleLabel.text = title
         self.fullText = description
-        
         calculateExpandability()
         updateTextDisplay()
     }
@@ -63,6 +70,7 @@ final class StoryLineView: UIView {
     private func setupViews() {
         addSubview(titleLabel)
         addSubview(descriptionLabel)
+        addSubview(readMoreButton)
     }
     
     private func setupConstraints() {
@@ -74,19 +82,16 @@ final class StoryLineView: UIView {
             descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
             descriptionLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
             descriptionLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
-            descriptionLabel.bottomAnchor.constraint(equalTo: bottomAnchor)
+            
+            readMoreButton.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 4),
+            readMoreButton.leadingAnchor.constraint(equalTo: leadingAnchor),
+            readMoreButton.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor),
+            readMoreButton.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
     
-    private func setupGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        descriptionLabel.addGestureRecognizer(tapGesture)
-    }
-    
     // MARK: - Actions
-    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
-        guard isExpandable else { return }
-        
+    @objc private func toggleExpand() {
         isExpanded.toggle()
         UIView.animate(withDuration: 0.3) {
             self.updateTextDisplay()
@@ -108,6 +113,7 @@ final class StoryLineView: UIView {
         
         let collapsedHeight = descriptionLabel.font.lineHeight * CGFloat(collapsedLines)
         isExpandable = requiredHeight > collapsedHeight
+        readMoreButton.isHidden = !isExpandable
     }
     
     private func updateTextDisplay() {
@@ -116,6 +122,7 @@ final class StoryLineView: UIView {
         } else {
             showCollapsedText()
         }
+        updateReadMoreButton()
     }
     
     private func showFullText() {
@@ -124,58 +131,11 @@ final class StoryLineView: UIView {
     }
     
     private func showCollapsedText() {
-        guard isExpandable else {
-            descriptionLabel.numberOfLines = 0
-            descriptionLabel.text = fullText
-            return
-        }
-        
-        let trailing = TrailingContent.readmore
-        let maxLines = self.collapsedLines
-        
-        // Create full attributed string
-        let attributedString = NSMutableAttributedString(
-            string: fullText,
-            attributes: [.font: descriptionLabel.font!]
-        )
-        
-        // Add "Show more" at the end
-        let readMoreString = NSAttributedString(
-            string: trailing.text,
-            attributes: [.foregroundColor: trailing.color]
-        )
-        attributedString.append(readMoreString)
-        
-        // Calculate text container
-        let textStorage = NSTextStorage(attributedString: attributedString)
-        let textContainer = NSTextContainer(size: CGSize(
-            width: descriptionLabel.bounds.width,
-            height: .greatestFiniteMagnitude
-        ))
-        let layoutManager = NSLayoutManager()
-        layoutManager.addTextContainer(textContainer)
-        textStorage.addLayoutManager(layoutManager)
-        
-        // Find the truncation point
-        var lineCount = 0
-        var index = 0
-        var range = NSRange(location: 0, length: 0)
-        
-        while index < layoutManager.numberOfGlyphs && lineCount < maxLines {
-            layoutManager.lineFragmentRect(forGlyphAt: index, effectiveRange: &range)
-            index = NSMaxRange(range)
-            lineCount += 1
-        }
-        
-        // Create truncated string
-        let truncatedString = NSMutableAttributedString()
-        if range.location > 0 {
-            truncatedString.append(attributedString.attributedSubstring(from: NSRange(location: 0, length: range.location)))
-        }
-        truncatedString.append(readMoreString)
-        
-        // Apply to label
-        descriptionLabel.numberOfLines = maxLines
-        descriptionLabel.attributedText = truncatedString
+        descriptionLabel.numberOfLines = collapsedLines
+        descriptionLabel.text = fullText
+    }
+    
+    private func updateReadMoreButton() {
+        readMoreButton.setTitle(isExpanded ? "Show less" : "Show more", for: .normal)
     }
 }

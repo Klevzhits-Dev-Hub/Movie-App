@@ -143,7 +143,7 @@ final class MovieDetailViewController: UIViewController {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = 20
-        layout.itemSize = CGSize(width: 150, height: 41)
+        layout.itemSize = CGSize(width: 180, height: 41)
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
