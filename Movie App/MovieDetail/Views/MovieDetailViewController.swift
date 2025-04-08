@@ -7,10 +7,17 @@
 
 import UIKit
 
+protocol MovieDetailViewProtocol: AnyObject {
+    func displayMovieDetails(_ movie: Movie)
+    func reloadActorsCollection()
+}
+
 final class MovieDetailViewController: UIViewController {
     
     // MARK: - Private Properties
-    private let movieDescriptionText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    private let presenter: MovieDetailPresenterProtocol
+    
+    private let movieDescriptionText = ""
     
     // MARK: - UI
     private lazy var scrollView: UIScrollView = {
@@ -27,9 +34,9 @@ final class MovieDetailViewController: UIViewController {
     
     private lazy var movieImageView: UIImageView = {
         let element = UIImageView()
-        element.image = UIImage(named: "Image")
-        element.contentMode = .scaleAspectFit
+        element.contentMode = .scaleAspectFill
         element.layer.cornerRadius = 16
+        element.clipsToBounds = true
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -55,7 +62,7 @@ final class MovieDetailViewController: UIViewController {
         let element = UIStackView()
         element.axis = .horizontal
         element.spacing = 24
-        element.distribution = .fillProportionally
+        element.distribution = .equalCentering
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -141,7 +148,7 @@ final class MovieDetailViewController: UIViewController {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = 20
-        layout.itemSize = CGSize(width: 150, height: 41)
+        layout.itemSize = CGSize(width: 180, height: 41)
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -165,18 +172,32 @@ final class MovieDetailViewController: UIViewController {
         )
         element.backgroundColor = UIColor(named: "SelectedColor")
         element.layer.cornerRadius = 24
+        element.addTarget(self, action: #selector(watchNowButtonTapped), for: .touchUpInside)
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
+    
     
     lazy var timeElements = makeStackView(image: UIImage(named: "timeImage"), view: timeLabel)
     lazy var dataElements = makeStackView(image: UIImage(named: "dataImage"), view: dataLabel )
     lazy var genreElements = makeStackView(image: UIImage(named: "filmIconImage"), view: genreLabel)
     
+    
+    init(movieId: Int) {
+        self.presenter = MovieDetailPresenter(movieId: movieId)
+        super.init(nibName: nil, bundle: nil)
+        self.presenter.view = self
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // MARK: - Life Circle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(named: "BackgroundColor")
+        presenter.viewDidLoad()
         setupViews()
         setupConstraints()
         configureDescription()
@@ -229,12 +250,82 @@ final class MovieDetailViewController: UIViewController {
         actorCollectionContainer.layer.shouldRasterize = true
         actorCollectionContainer.layer.rasterizationScale = UIScreen.main.scale
     }
+    
+    @objc private func watchNowButtonTapped() {
+        guard let url = presenter.getTrailerURL() else {
+            showNoTrailerAlert()
+            return
+        }
+        let webVC = WebViewController(url: url)
+        present(webVC, animated: true)
+    }
+    
+    private func showNoTrailerAlert() {
+        let alert = UIAlertController(
+            title: "No Trailer Available",
+            message: "There is no trailer available for this movie.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+}
+
+// MARK: - MovieDetailViewProtocol
+extension MovieDetailViewController: MovieDetailViewProtocol {
+    func displayMovieDetails(_ movie: Movie) {
+        movieNameLabel.text = movie.name ?? movie.alternativeName
+        timeLabel.text = movie.durationString
+        
+        if let premiereDate = movie.premiere?.world {
+            dataLabel.text = formatDate(premiereDate)
+        }
+        
+        genreLabel.text = movie.genres?.map { $0.name }.joined(separator: ", ")
+        
+        if let rating = movie.rating?.kp {
+            let ratingValue = Float(rating) / 2.0
+            starRatingView.updateRating(value: ratingValue)
+        }
+        
+        movieDescriptionView.configure(
+            title: "Story Line",
+            description: movie.description ?? movie.shortDescription ?? ""
+        )
+        
+        if let posterUrl = movie.poster?.url ?? movie.poster?.previewUrl {
+            ImageLoader.shared.loadImage(from: posterUrl) { [weak self] image in
+                DispatchQueue.main.async {
+                    self?.movieImageView.image = image
+                }
+            }
+        }
+    }
+    
+    
+    func reloadActorsCollection() {
+        actorCollectionView.reloadData()
+    }
+    
+    private func formatDate(_ dateString: String) -> String {
+        let inputFormatter = ISO8601DateFormatter()
+        inputFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "dd MMM yyyy"
+        outputFormatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        if let date = inputFormatter.date(from: dateString) {
+            return outputFormatter.string(from: date)
+        }
+        return dateString
+    }
 }
 
 // MARK: - UICollectionViewDataSource
 extension MovieDetailViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        3
+        return presenter.getActorsCount()
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -243,6 +334,10 @@ extension MovieDetailViewController: UICollectionViewDataSource {
             for: indexPath
         ) as? ActorsCollectionViewCell else {
             return UICollectionViewCell()
+        }
+        
+        if let actor = presenter.getActor(at: indexPath.item) {
+            cell.configure(with: actor)
         }
         
         return cell
@@ -321,7 +416,7 @@ private extension MovieDetailViewController {
             actorCollectionView.leadingAnchor.constraint(equalTo: actorCollectionContainer.leadingAnchor),
             actorCollectionView.trailingAnchor.constraint(equalTo: actorCollectionContainer.trailingAnchor),
             actorCollectionView.bottomAnchor.constraint(equalTo: actorCollectionContainer.bottomAnchor),
-
+            
             actorCollectionContainer.heightAnchor.constraint(equalToConstant: 41),
             
             watchNowButton.topAnchor.constraint(equalTo: actorStackView.bottomAnchor, constant: 24),
