@@ -33,8 +33,14 @@ class CarouselMovieCell: UICollectionViewCell {
         imageView.frame = contentView.bounds
     }
     
-    func configure(with image: String) {
-        imageView.image = UIImage(named: image)
+    func configure(with movie: Movie) {
+//        if let urlString = movie.poster?.url {
+//            ImageLoader.shared.loadImage(from: urlString) { [weak self] img in
+//                DispatchQueue.main.async {
+//                    self?.imageView.image = img
+//                }
+//            }
+//        }
     }
     
     override func prepareForReuse() {

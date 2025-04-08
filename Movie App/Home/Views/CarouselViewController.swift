@@ -8,7 +8,7 @@
 import UIKit
 
 class CarouselViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    
+    var movies = [Movie]()
     private var collectionView: UICollectionView?
     
     override func viewDidLoad() {
@@ -52,6 +52,7 @@ class CarouselViewController: UIViewController, UICollectionViewDelegate, UIColl
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CarouselMovieCell.identifier, for: indexPath) as! CarouselMovieCell
+        //cell.configure(with: movies[indexPath.item])
         return cell
     }
     
@@ -134,6 +135,11 @@ class CarouselViewController: UIViewController, UICollectionViewDelegate, UIColl
                         .rotated(by: rotationAngle * .pi / 180)
                 }
             }
+        }
+        
+        func configure(with movies: [Movie]) {
+            self.movies = movies
+            collectionView?.reloadData()
         }
     }
 }

@@ -8,6 +8,8 @@
 import UIKit
 
 final class CategoryHeaderView: UICollectionReusableView {
+    static let identifier = "CategoryHeaderView"
+    
     let label = UILabel()
     
     override init(frame: CGRect) {

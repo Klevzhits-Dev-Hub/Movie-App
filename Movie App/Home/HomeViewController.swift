@@ -7,48 +7,36 @@
 
 import UIKit
 
-protocol HomeViewProtocol: AnyObject {
-    func showMovies(_ movies: [Movie])
+enum ReuseIdentifier {
+    static let defaultCell = "DefaultCell"
 }
 
-final class HomeViewController: UICollectionViewController, HomeViewProtocol {
-    //let presenter: HomePresenterProtocol
+enum SectionKind {
+    static let categoryHeader = "categoryHeaderId"
+    static let boxOfficeHeader = "boxOfficeHeaderId"
+}
+
+protocol HomeViewProtocol: AnyObject {
+    func showMovies(_ movies: [Movie])
+    func showCategories(_ categories: [String])
+}
+
+final class HomeViewController: UICollectionViewController{
+    //MARK: - Properties
+    private let presenter: HomePresenterProtocol
+    private var displayedMovies = [Movie]()
+    private var categories = [String]()
     
-    let headerId = "headerId"
-    static let categoryHeaderId = "categoryHeaderId"
-    let boxOfficeId = "boxOfficeId"
-    static let boxOfficeHeaderId = "boxOfficeHeaderId"
-    let cellId = "cell"
-    
-    let categories = ["All", "Action", "Adventure", "Drama", "Comedy", "Biography"]
-    var popularMovies = [Movie]()
-        
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavigationBar()
         setupLargeNavBar()
         setupCollectionVIew()
-        //presenter.viewDidLoad()
-
-        NetworkManager.shared.fetchPopularMovies { result in
-            switch result {
-            case .success(let movieResponse):
-                self.popularMovies = movieResponse.docs
-                DispatchQueue.main.async {
-                    self.collectionView.reloadData()
-                }
-            case .failure(let error):
-                print("Error fetching movies: \(error)")
-            }
-        }
+        presenter.fetchCategories()
     }
-        
-//    init(presenter: HomePresenterProtocol) {
-//        self.presenter = presenter
-//        super.init(collectionViewLayout: HomeViewController.createLayout())
-//    }
-    
-    init() {
+            
+    init(presenter: HomePresenterProtocol) {
+        self.presenter = presenter
         super.init(collectionViewLayout: HomeViewController.createLayout())
     }
     
@@ -58,11 +46,27 @@ final class HomeViewController: UICollectionViewController, HomeViewProtocol {
 }
 
 // MARK: - Protocol Methods
-extension HomeViewController {
-    func showMovies(_ movies: [Movie]) {
-        self.popularMovies = movies
+extension HomeViewController: HomeViewProtocol {
+    func showCategories(_ categories: [String]) {
+        self.categories = categories
         DispatchQueue.main.async {
             self.collectionView.reloadData()
+            
+            // Select the first tap
+            let defaultIndexPath = IndexPath(item: 0, section: 1)
+            self.collectionView.selectItem(at: defaultIndexPath, animated: false, scrollPosition: [])
+            self.collectionView.delegate?.collectionView?(self.collectionView, didSelectItemAt: defaultIndexPath)
+        }
+    }
+    
+    func showMovies(_ movies: [Movie]) {
+        self.displayedMovies = movies
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            if self.collectionView.numberOfSections > 2 {
+                self.collectionView.reloadSections(IndexSet(integer: 2))
+            } else {
+                self.collectionView.reloadData()
+            }
         }
     }
 }
@@ -75,8 +79,8 @@ extension HomeViewController {
                                 withReuseIdentifier: CarouselHeaderView.reuseIdentifier)
         collectionView.register(CategoryCell.self, forCellWithReuseIdentifier: CategoryCell.identifier)
         collectionView.register(BoxOfficeMovieCell.self, forCellWithReuseIdentifier: BoxOfficeMovieCell.identifier)
-        collectionView.register(CategoryHeaderView.self, forSupplementaryViewOfKind: HomeViewController.categoryHeaderId, withReuseIdentifier: headerId)
-        collectionView.register(BoxOfficeHeaderView.self, forSupplementaryViewOfKind: HomeViewController.boxOfficeHeaderId, withReuseIdentifier: boxOfficeId)
+        collectionView.register(CategoryHeaderView.self, forSupplementaryViewOfKind: SectionKind.categoryHeader, withReuseIdentifier: CategoryHeaderView.identifier)
+        collectionView.register(BoxOfficeHeaderView.self, forSupplementaryViewOfKind: SectionKind.boxOfficeHeader, withReuseIdentifier: BoxOfficeHeaderView.identifier)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -100,7 +104,19 @@ extension HomeViewController {
         } else if section == 1 {
             return categories.count
         }
-        return popularMovies.count
+        return displayedMovies.count
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if indexPath.section == 1 {
+            if categories[indexPath.item] == "All" {
+                presenter.fetchAllMovies()
+            } else {
+                presenter.categoryTapped(category: categories[indexPath.item])
+            }
+        } else if indexPath.section == 2 {
+            presenter.movieTapped(selectedMovie: displayedMovies[indexPath.item])
+        }
     }
 }
 
@@ -109,7 +125,7 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if indexPath.section == 0 {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath)
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ReuseIdentifier.defaultCell, for: indexPath)
             cell.backgroundColor = .lightGray
             
             return cell
@@ -118,7 +134,7 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
             cell.configure(with: categories[indexPath.item])
             return cell
         }
-        let movie = popularMovies[indexPath.item]
+        let movie = displayedMovies[indexPath.item]
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: BoxOfficeMovieCell.identifier, for: indexPath) as! BoxOfficeMovieCell
         cell.configure(with: movie)
         return cell
@@ -156,7 +172,7 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
                     return section
         
         } else if sectionIndex == 1 {
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .estimated(100), heightDimension: .absolute(60)))
+            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .estimated(1), heightDimension: .absolute(60)))
             item.contentInsets.bottom = 16
         
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(70)), subitems: [item])
@@ -166,7 +182,7 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
             let section = NSCollectionLayoutSection(group: group)
             section.orthogonalScrollingBehavior = .continuous
             section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0)
-            section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: categoryHeaderId, alignment: .topLeading)]
+            section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: SectionKind.categoryHeader, alignment: .topLeading)]
             return section
             
         } else {
@@ -177,7 +193,7 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
             let section = NSCollectionLayoutSection(group: group)
             section.contentInsets.leading = 20
             section.contentInsets.trailing = 20
-            section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: boxOfficeHeaderId, alignment: .topLeading)]
+            section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: SectionKind.boxOfficeHeader, alignment: .topLeading)]
             return section
         }
     }
@@ -186,14 +202,15 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
 // MARK: - CollectionVIew Header Settings
 extension HomeViewController {
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        if kind == HomeViewController.categoryHeaderId {
-            return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerId, for: indexPath)
-        } else if kind == HomeViewController.boxOfficeHeaderId {
-            return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: boxOfficeId, for: indexPath)
+        if kind == SectionKind.categoryHeader {
+            return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: CategoryHeaderView.identifier, for: indexPath)
+        } else if kind == SectionKind.boxOfficeHeader {
+            return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: BoxOfficeHeaderView.identifier, for: indexPath)
         } else if kind == UICollectionView.elementKindSectionHeader, indexPath.section == 0 {
             let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
                                                                         withReuseIdentifier: CarouselHeaderView.reuseIdentifier,
                                                                         for: indexPath) as! CarouselHeaderView
+            //header.configure(with: displayedMovies)
             return header
         }
         fatalError("Unexpected element kind")
@@ -292,4 +309,6 @@ extension HomeViewController {
         }
     }
 }
+
+
 

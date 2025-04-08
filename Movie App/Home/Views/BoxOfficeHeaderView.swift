@@ -8,6 +8,8 @@
 import UIKit
 
 final class BoxOfficeHeaderView: UICollectionReusableView {
+    static let identifier = "BoxOfficeHeaderView"
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Box Office"
