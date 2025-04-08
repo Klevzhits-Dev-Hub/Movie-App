@@ -19,6 +19,50 @@ final class NetworkManager {
         performRequest(urlString: urlString, completion: completion)
     }
     
+    func fetchMoviesByGenre(
+            genre: String,
+            page: Int = 1,
+            limit: Int = 20,
+            completion: @escaping (Result<MovieResponse, Error>) -> Void
+    ) {
+        var urlComponents = URLComponents(string: "\(baseURL)movie")
+        
+        let queryItems = [
+            URLQueryItem(name: "page", value: "\(page)"),
+            URLQueryItem(name: "limit", value: "\(limit)"),
+            URLQueryItem(name: "genres.name", value: genre),
+            URLQueryItem(name: "typeNumber", value: "1") // только фильмы
+        ]
+        
+        urlComponents?.queryItems = queryItems
+        
+        guard let urlString = urlComponents?.url?.absoluteString else {
+            completion(.failure(NetworkError.invalidURL))
+            return
+        }
+        
+        performRequest(urlString: urlString, completion: completion)
+    }
+    
+    func fetchGenres(completion: @escaping (Result<[Genre], Error>) -> Void) {
+        let urlString = "https://api.kinopoisk.dev/v1/movie/possible-values-by-field"
+        let queryItems = [URLQueryItem(name: "field", value: "genres.name")]
+        
+        guard var urlComponents = URLComponents(string: urlString) else {
+            completion(.failure(NetworkError.invalidURL))
+            return
+        }
+        
+        urlComponents.queryItems = queryItems
+        
+        guard let finalURL = urlComponents.url else {
+            completion(.failure(NetworkError.invalidURL))
+            return
+        }
+        
+        performRequest(urlString: finalURL.absoluteString, completion: completion)
+    }
+    
     func fetchMovieDetails(id: Int, completion: @escaping (Result<Movie, Error>) -> Void) {
         let urlString = "\(baseURL)movie/\(id)"
         performRequest(urlString: urlString, completion: completion)

@@ -16,26 +16,42 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        NetworkManager.shared.fetchMovieDetails(id: movieId) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let movie):
-                    print(movie)
-                case .failure(let error):
-                    print("Error: ")
-                    print(error)
-                }
+//        NetworkManager.shared.fetchMovieDetails(id: movieId) { [weak self] result in
+//            DispatchQueue.main.async {
+//                switch result {
+//                case .success(let movie):
+//                    print(movie)
+//                case .failure(let error):
+//                    print("Error: ")
+//                    print(error)
+//                }
+//            }
+//        }
+//        NetworkManager.shared.fetchPopularMovies(page: currentPage) { [weak self] result in
+//            DispatchQueue.main.async {
+//                switch result {
+//                case .success(let response):
+//                    self?.movies.append(contentsOf: response.docs)
+//                case .failure(let error):
+//                    print("Error: \(error)")
+//                }
+//                print(self?.movies ?? [])
+//            }
+//        }
+        NetworkManager.shared.fetchMoviesByGenre(genre: "драма") { [weak self] result in
+            switch result {
+            case .success(let response):
+                print(response)
+            case .failure(let error):
+                print("Error: \(error)")
             }
         }
-        NetworkManager.shared.fetchPopularMovies(page: currentPage) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let response):
-                    self?.movies.append(contentsOf: response.docs)
-                case .failure(let error):
-                    print("Error: \(error)")
-                }
-                print(self?.movies ?? [])
+        NetworkManager.shared.fetchGenres { [weak self] result in
+            switch result {
+            case .success(let genres):
+                print(genres)
+            case .failure(let error):
+                print("Error: \(error)")
             }
         }
     }
