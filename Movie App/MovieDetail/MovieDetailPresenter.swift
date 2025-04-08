@@ -13,11 +13,7 @@ protocol MovieDetailPresenterProtocol: AnyObject {
     func watchNowButtonTapped()
     func getActorsCount() -> Int
     func getActor(at index: Int) -> Person?
-}
-
-protocol MovieDetailViewProtocol: AnyObject {
-    func displayMovieDetails(_ movie: Movie)
-    func reloadActorsCollection()
+    func getTrailerURL() -> URL?
 }
 
 final class MovieDetailPresenter: MovieDetailPresenterProtocol {
@@ -70,5 +66,18 @@ final class MovieDetailPresenter: MovieDetailPresenterProtocol {
                 }
             }
         }
+    }
+    
+    func getTrailerURL() -> URL? {
+        guard let trailers = movie?.videos?.trailers else { return nil }
+        for trailer in trailers {
+            if let site = trailer.site?.lowercased(),
+               site == "youtube",
+               let urlString = trailer.url,
+               let url = URL(string: urlString) {
+                return url
+            }
+        }
+        return nil
     }
 }

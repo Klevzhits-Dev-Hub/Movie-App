@@ -7,6 +7,11 @@
 
 import UIKit
 
+protocol MovieDetailViewProtocol: AnyObject {
+    func displayMovieDetails(_ movie: Movie)
+    func reloadActorsCollection()
+}
+
 final class MovieDetailViewController: UIViewController {
     
     // MARK: - Private Properties
@@ -167,9 +172,11 @@ final class MovieDetailViewController: UIViewController {
         )
         element.backgroundColor = UIColor(named: "SelectedColor")
         element.layer.cornerRadius = 24
+        element.addTarget(self, action: #selector(watchNowButtonTapped), for: .touchUpInside)
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
+    
     
     lazy var timeElements = makeStackView(image: UIImage(named: "timeImage"), view: timeLabel)
     lazy var dataElements = makeStackView(image: UIImage(named: "dataImage"), view: dataLabel )
@@ -177,11 +184,11 @@ final class MovieDetailViewController: UIViewController {
     
     
     init(movieId: Int) {
-         self.presenter = MovieDetailPresenter(movieId: movieId)
-         super.init(nibName: nil, bundle: nil)
-         self.presenter.view = self
-     }
-
+        self.presenter = MovieDetailPresenter(movieId: movieId)
+        super.init(nibName: nil, bundle: nil)
+        self.presenter.view = self
+    }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -243,6 +250,25 @@ final class MovieDetailViewController: UIViewController {
         actorCollectionContainer.layer.shouldRasterize = true
         actorCollectionContainer.layer.rasterizationScale = UIScreen.main.scale
     }
+    
+    @objc private func watchNowButtonTapped() {
+        guard let url = presenter.getTrailerURL() else {
+            showNoTrailerAlert()
+            return
+        }
+        let webVC = WebViewController(url: url)
+        present(webVC, animated: true)
+    }
+    
+    private func showNoTrailerAlert() {
+        let alert = UIAlertController(
+            title: "No Trailer Available",
+            message: "There is no trailer available for this movie.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
 }
 
 // MARK: - MovieDetailViewProtocol
@@ -258,7 +284,7 @@ extension MovieDetailViewController: MovieDetailViewProtocol {
         genreLabel.text = movie.genres?.map { $0.name }.joined(separator: ", ")
         
         if let rating = movie.rating?.kp {
-            let ratingValue = Float(rating) / 2.0 
+            let ratingValue = Float(rating) / 2.0
             starRatingView.updateRating(value: ratingValue)
         }
         
@@ -284,11 +310,11 @@ extension MovieDetailViewController: MovieDetailViewProtocol {
     private func formatDate(_ dateString: String) -> String {
         let inputFormatter = ISO8601DateFormatter()
         inputFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-
+        
         let outputFormatter = DateFormatter()
         outputFormatter.dateFormat = "dd MMM yyyy"
         outputFormatter.locale = Locale(identifier: "en_US_POSIX")
-
+        
         if let date = inputFormatter.date(from: dateString) {
             return outputFormatter.string(from: date)
         }
@@ -390,7 +416,7 @@ private extension MovieDetailViewController {
             actorCollectionView.leadingAnchor.constraint(equalTo: actorCollectionContainer.leadingAnchor),
             actorCollectionView.trailingAnchor.constraint(equalTo: actorCollectionContainer.trailingAnchor),
             actorCollectionView.bottomAnchor.constraint(equalTo: actorCollectionContainer.bottomAnchor),
-
+            
             actorCollectionContainer.heightAnchor.constraint(equalToConstant: 41),
             
             watchNowButton.topAnchor.constraint(equalTo: actorStackView.bottomAnchor, constant: 24),
