@@ -55,6 +55,7 @@ extension HomePresenter: HomePresenterProtocol {
     }
     
     func categoryTapped(category: String) {
+        
         selectedCategory = category
         NetworkManager.shared.fetchMoviesByGenre(genre: category.lowercased()) { [weak self] result in
             switch result {

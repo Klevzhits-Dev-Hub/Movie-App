@@ -28,18 +28,34 @@ final class HomeViewController: UICollectionViewController{
     private var displayedMovies = [Movie]()
     private var categories = [String]()
     private var selectedCategoryIndex: IndexPath?
+    private var didReceiveCategories = false
+    private var didReceiveMovies = false
+    
+    private let loader = UIActivityIndicatorView(style: .large)
+    private var isInitialDataLoaded = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavigationBar()
         setupLargeNavBar()
         setupCollectionVIew()
+        setupLoader()
         presenter.fetchCategories()
+        
+        collectionView.alpha = 0 // Для анимации появления
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        selectPreviouslySelectedCategoryIfNeeded()
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        collectionView.alpha = 0
+        collectionView.isHidden = true
+        loader.startAnimating()
+
+        didReceiveCategories = false
+        didReceiveMovies = false
+
+        presenter.fetchCategories()
     }
             
     init(presenter: HomePresenterProtocol) {
@@ -56,6 +72,7 @@ final class HomeViewController: UICollectionViewController{
 extension HomeViewController: HomeViewProtocol {
     func showCategories(_ categories: [String]) {
         self.categories = categories
+        didReceiveCategories = true
         DispatchQueue.main.async {
             self.collectionView.reloadData()
 
@@ -66,17 +83,21 @@ extension HomeViewController: HomeViewProtocol {
             self.selectedCategoryIndex = indexPath
             self.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
             self.collectionView.delegate?.collectionView?(self.collectionView, didSelectItemAt: indexPath)
+            
+            self.checkIfLoadingCompleted()
         }
     }
     
     func showMovies(_ movies: [Movie]) {
         self.displayedMovies = movies
+        didReceiveMovies = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
             if self.collectionView.numberOfSections > 2 {
                 self.collectionView.reloadSections(IndexSet(integer: 2))
             } else {
                 self.collectionView.reloadData()
             }
+            self.checkIfLoadingCompleted()
         }
     }
     
@@ -134,6 +155,7 @@ extension HomeViewController {
                 //presenter.categoryTapped(category: categories[indexPath.item])
             }
         } else if indexPath.section == 2 {
+            collectionView.isHidden = true
             presenter.movieTapped(selectedMovie: displayedMovies[indexPath.item])
         }
     }
@@ -320,7 +342,7 @@ extension HomeViewController {
         view.bringSubviewToFront(navigationController!.navigationBar)
     }
 }
-// MARK: - UI halpers
+// MARK: - UI helpers
 extension HomeViewController {
     func updateVisibleCellsColor() {
         for cell in collectionView.visibleCells {
@@ -339,6 +361,40 @@ extension HomeViewController {
 
         collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
         collectionView.delegate?.collectionView?(collectionView, didSelectItemAt: indexPath)
+    }
+    
+    private func setupLoader() {
+        loader.translatesAutoresizingMaskIntoConstraints = false
+        loader.hidesWhenStopped = true
+        view.addSubview(loader)
+
+        NSLayoutConstraint.activate([
+            loader.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loader.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+        
+        loader.startAnimating()
+        collectionView.isHidden = true
+    }
+    
+    private func showLoader() {
+        loader.startAnimating()
+        collectionView.isHidden = true
+    }
+
+    private func hideLoader() {
+        loader.stopAnimating()
+        collectionView.isHidden = false
+    }
+    
+    private func checkIfLoadingCompleted() {
+        guard didReceiveCategories && didReceiveMovies else { return }
+
+        loader.stopAnimating()
+        collectionView.isHidden = false
+        UIView.animate(withDuration: 0.5, delay: 0.1, options: [.curveEaseInOut]) {
+            self.collectionView.alpha = 1
+        }
     }
 }
 
