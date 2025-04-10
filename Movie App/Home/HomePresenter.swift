@@ -19,6 +19,7 @@ protocol HomePresenterProtocol: AnyObject {
 final class HomePresenter {
     private weak var view: HomeViewProtocol?
     private var selectedCategory: String?
+    private var moviesCache: [String: [Movie]] = [:]
 
     init() {
     }
@@ -44,9 +45,18 @@ extension HomePresenter: HomePresenterProtocol {
     }
     
     func fetchAllMovies() {
+        let key = "all"
+        
+        if let cached = moviesCache[key] {
+            self.view?.showBoxOfficeMovies(cached)
+            print("DEBUGGGGG")
+            return
+        }
+        
         NetworkManager.shared.fetchPopularMovies { [weak self] result in
             switch result {
             case .success(let response):
+                self?.moviesCache[key] = response.docs
                 self?.view?.showMovies(response.docs)
             case .failure(let error):
                 print("Error fetching movies: \(error)")
@@ -56,13 +66,20 @@ extension HomePresenter: HomePresenterProtocol {
     
     func categoryTapped(category: String) {
         selectedCategory = category
-        
+        let key = category.lowercased()
+
+        if let cached = moviesCache[key] {
+            self.view?.showBoxOfficeMovies(cached)
+            return
+        }
+
         if category != "All" {
-            NetworkManager.shared.fetchMoviesByGenre(genre: category.lowercased()) { [weak self] result in
+            NetworkManager.shared.fetchMoviesByGenre(genre: key) { [weak self] result in
                 switch result {
                 case .success(let response):
                     let filteredMovies = response.docs.filter { $0.name?.isEmpty == false }
-                    self?.view?.showMovies(filteredMovies)
+                    self?.moviesCache[key] = filteredMovies
+                    self?.view?.showBoxOfficeMovies(filteredMovies)
                 case .failure(let error):
                     print("Error fetching genres: \(error)")
                 }
@@ -73,12 +90,10 @@ extension HomePresenter: HomePresenterProtocol {
     }
     
     func getSelectedCategory() -> String? {
-        print(selectedCategory)
         return selectedCategory
     }
     
     func movieTapped(selectedMovie: Movie) {
-        print("Tapped movie: \(selectedMovie.name ?? "")")
         view?.navigateToMovieDetail(movieId: selectedMovie.id)
     }
     

@@ -4,7 +4,6 @@
 //
 //  Created by Dmitry Volkov on 01/04/2025.
 //
-
 import UIKit
 
 class CarouselMovieCell: UICollectionViewCell {
@@ -19,13 +18,25 @@ class CarouselMovieCell: UICollectionViewCell {
         return iv
     }()
     
+    // Добавим замыкание
+    var didTap: (() -> Void)?
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         contentView.addSubview(imageView)
+        
+        // Gesture recognizer
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        contentView.addGestureRecognizer(tap)
+        contentView.isUserInteractionEnabled = true
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    @objc private func handleTap() {
+        didTap?()
     }
     
     override func layoutSubviews() {
@@ -34,17 +45,18 @@ class CarouselMovieCell: UICollectionViewCell {
     }
     
     func configure(with movie: Movie) {
-//        if let urlString = movie.poster?.url {
-//            ImageLoader.shared.loadImage(from: urlString) { [weak self] img in
-//                DispatchQueue.main.async {
-//                    self?.imageView.image = img
-//                }
-//            }
-//        }
+        if let urlString = movie.poster?.url {
+            ImageLoader.shared.loadImage(from: urlString) { [weak self] img in
+                DispatchQueue.main.async {
+                    self?.imageView.image = img
+                }
+            }
+        }
     }
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        //imageView.image = nil
+        imageView.image = nil
+        didTap = nil
     }
 }

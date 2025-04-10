@@ -10,6 +10,7 @@ import UIKit
 class CarouselViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     var movies = [Movie]()
     private var collectionView: UICollectionView?
+    var onMovieTapped: ((Movie) -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,12 +48,26 @@ class CarouselViewController: UIViewController, UICollectionViewDelegate, UIColl
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 9
+        if !movies.isEmpty {
+            return movies.count
+        } else {
+            return 9
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CarouselMovieCell.identifier, for: indexPath) as! CarouselMovieCell
-        //cell.configure(with: movies[indexPath.item])
+        
+        if !movies.isEmpty {
+            let movie = movies[indexPath.item]
+            cell.configure(with: movie)
+                
+            cell.didTap = { [weak self] in
+                print("Tapped movie: \(movie.name ?? "Unknown") at index \(indexPath.item)")
+                self?.onMovieTapped?(movie)
+            }
+        }
+        
         return cell
     }
     
@@ -136,10 +151,10 @@ class CarouselViewController: UIViewController, UICollectionViewDelegate, UIColl
                 }
             }
         }
-        
-        func configure(with movies: [Movie]) {
-            self.movies = movies
-            collectionView?.reloadData()
-        }
+    }
+    
+    func configure(with movies: [Movie]) {
+        self.movies = movies
+        collectionView?.reloadData()
     }
 }

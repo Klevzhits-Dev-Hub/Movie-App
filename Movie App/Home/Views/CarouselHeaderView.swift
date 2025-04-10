@@ -11,6 +11,7 @@ class CarouselHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "CarouselHeaderView"
     
     let carouselVC = CarouselViewController()
+    private var isConfigured = false
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -31,7 +32,8 @@ class CarouselHeaderView: UICollectionReusableView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(with movies: [Movie]) {
-        
+    func configure(with movies: [Movie], onMovieTapped: @escaping (Movie) -> Void) {
+        carouselVC.configure(with: movies)
+        carouselVC.onMovieTapped = onMovieTapped
     }
 }

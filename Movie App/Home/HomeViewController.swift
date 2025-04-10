@@ -19,6 +19,7 @@ enum SectionKind {
 protocol HomeViewProtocol: AnyObject {
     func showMovies(_ movies: [Movie])
     func showCategories(_ categories: [String])
+    func showBoxOfficeMovies(_ movies: [Movie])
     func navigateToMovieDetail(movieId: Int)
 }
 
@@ -26,6 +27,7 @@ final class HomeViewController: UICollectionViewController{
     //MARK: - Properties
     private let presenter: HomePresenterProtocol
     private var displayedMovies = [Movie]()
+    private var carouselMovies: [Movie] = []
     private var categories = [String]()
     private var selectedCategoryIndex: IndexPath?
     private var didReceiveCategories = false
@@ -42,7 +44,7 @@ final class HomeViewController: UICollectionViewController{
         setupLoader()
         presenter.fetchCategories()
         
-        collectionView.alpha = 0 // Для анимации появления
+        collectionView.alpha = 0
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -56,6 +58,7 @@ final class HomeViewController: UICollectionViewController{
         didReceiveMovies = false
 
         presenter.fetchCategories()
+        
     }
             
     init(presenter: HomePresenterProtocol) {
@@ -89,6 +92,28 @@ extension HomeViewController: HomeViewProtocol {
     }
     
     func showMovies(_ movies: [Movie]) {
+        self.displayedMovies = movies
+        
+        if carouselMovies.isEmpty {
+            carouselMovies = Array(displayedMovies
+                .filter { $0.poster?.url != nil }
+                .shuffled()
+                .prefix(10))
+        }
+    
+        didReceiveMovies = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            if self.collectionView.numberOfSections > 2 {
+                self.collectionView.reloadSections(IndexSet([0, 2]))
+                self.collectionView.reloadSections(IndexSet(integer: 2))
+            } else {
+                self.collectionView.reloadData()
+            }
+            self.checkIfLoadingCompleted()
+        }
+    }
+    
+    func showBoxOfficeMovies(_ movies: [Movie]) {
         self.displayedMovies = movies
         didReceiveMovies = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
@@ -244,12 +269,16 @@ extension HomeViewController {
         } else if kind == UICollectionView.elementKindSectionHeader, indexPath.section == 0 {
             let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
                                                                         withReuseIdentifier: CarouselHeaderView.reuseIdentifier,
-                                                                        for: indexPath) as! CarouselHeaderView
-            //header.configure(with: displayedMovies)
+                                                                         for: indexPath) as! CarouselHeaderView
+            // фильмы для карусели
+            header.configure(with: self.carouselMovies) { [weak self] movie in
+                self?.presenter.movieTapped(selectedMovie: movie)
+            }
             return header
         }
         fatalError("Unexpected element kind")
     }
+
 }
 
 // MARK: - NavBar Settings
