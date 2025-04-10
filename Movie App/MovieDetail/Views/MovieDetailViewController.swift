@@ -182,6 +182,7 @@ final class MovieDetailViewController: UIViewController {
     lazy var dataElements = makeStackView(image: UIImage(named: "dataImage"), view: dataLabel )
     lazy var genreElements = makeStackView(image: UIImage(named: "filmIconImage"), view: genreLabel)
     
+
     
     init(movieId: Int) {
         self.presenter = MovieDetailPresenter(movieId: movieId)
@@ -283,19 +284,37 @@ final class MovieDetailViewController: UIViewController {
     private func configureNavigationBar() {
         navigationItem.title = "Movie Detail"
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            image: UIImage(named: "cancelButton"),
-            style: .plain,
-            target: self,
-            action: #selector(cancelButtonTapped)
-        )
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(named: "cancelButton")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        button.tintColor = .label
+        button.backgroundColor = .systemGray5
+        button.layer.cornerRadius = 24
+        button.layer.masksToBounds = true
+
+        button.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            button.widthAnchor.constraint(equalToConstant: 48),
+            button.heightAnchor.constraint(equalToConstant: 48)
+        ])
+
+        button.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
+
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: button)
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
-            image: UIImage(named: "emptyLikeButton"),
-            style: .plain,
-            target: self,
-            action: #selector(addToFavotiteButtonTapped)
-        )
+        
+        let heartButton = UIButton(type: .system)
+        heartButton.setImage(UIImage(named: "emptyLikeButton")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        heartButton.tintColor = .label
+
+        heartButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            heartButton.widthAnchor.constraint(equalToConstant: 19),
+            heartButton.heightAnchor.constraint(equalToConstant: 17)
+        ])
+
+        heartButton.addTarget(self, action: #selector(addToFavotiteButtonTapped), for: .touchUpInside)
+
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: heartButton)
     }
     
 
