@@ -201,6 +201,7 @@ final class MovieDetailViewController: UIViewController {
         setupViews()
         setupConstraints()
         configureDescription()
+        configureNavigationBar()
     }
     
     override func viewDidLayoutSubviews() {
@@ -260,6 +261,15 @@ final class MovieDetailViewController: UIViewController {
         present(webVC, animated: true)
     }
     
+    @objc private func addToFavotiteButtonTapped() {
+        print("tap")
+    }
+    
+    @objc private func cancelButtonTapped() {
+        print("cancelButtonTapped")
+        dismiss(animated: true)
+    }
+    
     private func showNoTrailerAlert() {
         let alert = UIAlertController(
             title: "No Trailer Available",
@@ -269,6 +279,26 @@ final class MovieDetailViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
+    
+    private func configureNavigationBar() {
+        navigationItem.title = "Movie Detail"
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            image: UIImage(named: "cancelButton"),
+            style: .plain,
+            target: self,
+            action: #selector(cancelButtonTapped)
+        )
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            image: UIImage(named: "emptyLikeButton"),
+            style: .plain,
+            target: self,
+            action: #selector(addToFavotiteButtonTapped)
+        )
+    }
+    
+
 }
 
 // MARK: - MovieDetailViewProtocol
@@ -388,7 +418,7 @@ private extension MovieDetailViewController {
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
-            movieImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
+            movieImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 32),
             movieImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             movieImageView.heightAnchor.constraint(equalToConstant: 300),
             movieImageView.widthAnchor.constraint(equalToConstant: 224),
