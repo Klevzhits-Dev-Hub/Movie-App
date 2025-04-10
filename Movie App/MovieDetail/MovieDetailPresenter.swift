@@ -14,6 +14,8 @@ protocol MovieDetailPresenterProtocol: AnyObject {
     func getActorsCount() -> Int
     func getActor(at index: Int) -> Person?
     func getTrailerURL() -> URL?
+    func toggleLike()
+    func isMovieLiked() -> Bool
 }
 
 final class MovieDetailPresenter: MovieDetailPresenterProtocol {
@@ -79,5 +81,16 @@ final class MovieDetailPresenter: MovieDetailPresenterProtocol {
             }
         }
         return nil
+    }
+    
+    func toggleLike() {
+        guard let movie = movie else { return }
+        CoreDataManager.shared.toggleLike(movie: movie)
+        view?.updateLikeButton()
+    }
+    
+    func isMovieLiked() -> Bool {
+        guard let movie = movie else { return false }
+        return CoreDataManager.shared.getLikedMovies().contains { $0.id == Int32(movie.id) }
     }
 }

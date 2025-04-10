@@ -10,6 +10,7 @@ import UIKit
 protocol MovieDetailViewProtocol: AnyObject {
     func displayMovieDetails(_ movie: Movie)
     func reloadActorsCollection()
+    func updateLikeButton()
 }
 
 final class MovieDetailViewController: UIViewController {
@@ -262,22 +263,13 @@ final class MovieDetailViewController: UIViewController {
         present(webVC, animated: true)
     }
     
-    @objc private func addToFavotiteButtonTapped() {
-        changeButtonColor()
+    @objc private func addToFavoriteButtonTapped() {
+        presenter.toggleLike()
     }
     
     @objc private func cancelButtonTapped() {
         print("cancelButtonTapped")
         dismiss(animated: true)
-    }
-    
-    private func changeButtonColor() {
-        guard let heartButton = navigationItem.rightBarButtonItem?.customView as? UIButton else { return }
-            
-            let isLiked = heartButton.currentImage == UIImage(named: "likeButton")
-            
-            let newImageName = isLiked ? "favoriteButtonDetail" : "likeButton"
-            heartButton.setImage(UIImage(named: newImageName), for: .normal)
     }
     
     private func showNoTrailerAlert() {
@@ -293,37 +285,33 @@ final class MovieDetailViewController: UIViewController {
     private func configureNavigationBar() {
         navigationItem.title = "Movie Detail"
         
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(named: "cancelButton"), for: .normal)
-        button.tintColor = .label
-        button.backgroundColor = .systemGray5
-        button.layer.cornerRadius = 24
-        button.layer.masksToBounds = true
-
-        button.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            button.widthAnchor.constraint(equalToConstant: 48),
-            button.heightAnchor.constraint(equalToConstant: 48)
-        ])
-
-        button.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
-
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: button)
+        let cancelButton = UIButton(type: .system)
+        cancelButton.setImage(UIImage(named: "cancelButton"), for: .normal)
+        cancelButton.tintColor = .label
+        cancelButton.backgroundColor = .systemGray5
+        cancelButton.layer.cornerRadius = 24
+        cancelButton.layer.masksToBounds = true
         
+        cancelButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            cancelButton.widthAnchor.constraint(equalToConstant: 48),
+            cancelButton.heightAnchor.constraint(equalToConstant: 48)
+        ])
+        cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: cancelButton)
         
         let heartButton = UIButton(type: .custom)
-            heartButton.setImage(UIImage(named: "favoriteButtonDetail"), for: .normal)
-            heartButton.contentMode = .scaleAspectFit
-            heartButton.imageView?.contentMode = .scaleAspectFit
-
-            heartButton.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                heartButton.widthAnchor.constraint(equalToConstant: 24),
-                heartButton.heightAnchor.constraint(equalToConstant: 24)
-            ])
-
-        heartButton.addTarget(self, action: #selector(addToFavotiteButtonTapped), for: .touchUpInside)
-
+        let initialImageName = presenter.isMovieLiked() ? "likeButton" : "favoriteButtonDetail"
+        heartButton.setImage(UIImage(named: initialImageName), for: .normal)
+        heartButton.contentMode = .scaleAspectFit
+        heartButton.imageView?.contentMode = .scaleAspectFit
+        
+        heartButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            heartButton.widthAnchor.constraint(equalToConstant: 24),
+            heartButton.heightAnchor.constraint(equalToConstant: 24)
+        ])
+        heartButton.addTarget(self, action: #selector(addToFavoriteButtonTapped), for: .touchUpInside)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: heartButton)
     }
     
@@ -361,6 +349,14 @@ extension MovieDetailViewController: MovieDetailViewProtocol {
         }
     }
     
+    func updateLikeButton() {
+        let isLiked = presenter.isMovieLiked()
+        let imageName = isLiked ? "likeButton" : "favoriteButtonDetail"
+        
+        if let heartButton = navigationItem.rightBarButtonItem?.customView as? UIButton {
+            heartButton.setImage(UIImage(named: imageName), for: .normal)
+        }
+    }
     
     func reloadActorsCollection() {
         actorCollectionView.reloadData()
