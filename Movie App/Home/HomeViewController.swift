@@ -19,6 +19,7 @@ enum SectionKind {
 protocol HomeViewProtocol: AnyObject {
     func showMovies(_ movies: [Movie])
     func showCategories(_ categories: [String])
+    func navigateToMovieDetail(movieId: Int)
 }
 
 final class HomeViewController: UICollectionViewController{
@@ -26,6 +27,7 @@ final class HomeViewController: UICollectionViewController{
     private let presenter: HomePresenterProtocol
     private var displayedMovies = [Movie]()
     private var categories = [String]()
+    private var selectedCategoryIndex: IndexPath?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,6 +35,11 @@ final class HomeViewController: UICollectionViewController{
         setupLargeNavBar()
         setupCollectionVIew()
         presenter.fetchCategories()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        selectPreviouslySelectedCategoryIfNeeded()
     }
             
     init(presenter: HomePresenterProtocol) {
@@ -51,11 +58,14 @@ extension HomeViewController: HomeViewProtocol {
         self.categories = categories
         DispatchQueue.main.async {
             self.collectionView.reloadData()
-            
-            // Select the first tap
-            let defaultIndexPath = IndexPath(item: 0, section: 1)
-            self.collectionView.selectItem(at: defaultIndexPath, animated: false, scrollPosition: [])
-            self.collectionView.delegate?.collectionView?(self.collectionView, didSelectItemAt: defaultIndexPath)
+
+            let selectedCategory = self.presenter.getSelectedCategory()
+            let itemIndex = selectedCategory.flatMap { categories.firstIndex(of: $0) } ?? 0
+            let indexPath = IndexPath(item: itemIndex, section: 1)
+
+            self.selectedCategoryIndex = indexPath
+            self.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+            self.collectionView.delegate?.collectionView?(self.collectionView, didSelectItemAt: indexPath)
         }
     }
     
@@ -68,6 +78,11 @@ extension HomeViewController: HomeViewProtocol {
                 self.collectionView.reloadData()
             }
         }
+    }
+    
+    func navigateToMovieDetail(movieId: Int) {
+        let detailVC = MovieDetailViewController(movieId: movieId)
+        navigationController?.pushViewController(detailVC, animated: true)
     }
 }
 
@@ -110,9 +125,13 @@ extension HomeViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if indexPath.section == 1 {
             if categories[indexPath.item] == "All" {
+                selectedCategoryIndex = indexPath
                 presenter.fetchAllMovies()
             } else {
-                presenter.categoryTapped(category: categories[indexPath.item])
+                selectedCategoryIndex = indexPath
+                let category = categories[indexPath.item]
+                presenter.categoryTapped(category: category)
+                //presenter.categoryTapped(category: categories[indexPath.item])
             }
         } else if indexPath.section == 2 {
             presenter.movieTapped(selectedMovie: displayedMovies[indexPath.item])
@@ -307,6 +326,19 @@ extension HomeViewController {
         for cell in collectionView.visibleCells {
             cell.backgroundColor = .green
         }
+    }
+    
+    private func selectPreviouslySelectedCategoryIfNeeded() {
+        guard !categories.isEmpty else { return }
+
+        let selectedCategory = presenter.getSelectedCategory()
+        let itemIndex = selectedCategory.flatMap { categories.firstIndex(of: $0) } ?? 0
+        let indexPath = IndexPath(item: itemIndex, section: 1)
+
+        selectedCategoryIndex = indexPath
+
+        collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+        collectionView.delegate?.collectionView?(collectionView, didSelectItemAt: indexPath)
     }
 }
 

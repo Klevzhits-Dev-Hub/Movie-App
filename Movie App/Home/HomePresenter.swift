@@ -10,6 +10,7 @@ protocol HomePresenterProtocol: AnyObject {
     func fetchCategories()
     func fetchAllMovies()
     func categoryTapped(category: String)
+    func getSelectedCategory() -> String?
     func movieTapped(selectedMovie: Movie)
     func toggleFavourite()
     func seeAllTapped()
@@ -17,6 +18,7 @@ protocol HomePresenterProtocol: AnyObject {
 
 final class HomePresenter {
     private weak var view: HomeViewProtocol?
+    private var selectedCategory: String?
 
     init() {
     }
@@ -53,20 +55,25 @@ extension HomePresenter: HomePresenterProtocol {
     }
     
     func categoryTapped(category: String) {
-        print("<DEBUGGGG")
-        NetworkManager.shared.fetchMoviesByGenre(genre: category.lowercased()) { result in
+        selectedCategory = category
+        NetworkManager.shared.fetchMoviesByGenre(genre: category.lowercased()) { [weak self] result in
             switch result {
             case .success(let response):
                 let filteredMovies = response.docs.filter { $0.name?.isEmpty == false }
-                self.view?.showMovies(filteredMovies)
+                self?.view?.showMovies(filteredMovies)
             case .failure(let error):
                 print("Error fetching genres: \(error)")
             }
         }
     }
     
+    func getSelectedCategory() -> String? {
+        return selectedCategory
+    }
+    
     func movieTapped(selectedMovie: Movie) {
-        print("Tapped movie: \(selectedMovie.name)")
+        print("Tapped movie: \(selectedMovie.name ?? "")")
+        view?.navigateToMovieDetail(movieId: selectedMovie.id)
     }
     
     func toggleFavourite() {
