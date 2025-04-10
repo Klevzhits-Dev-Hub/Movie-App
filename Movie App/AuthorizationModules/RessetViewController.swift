@@ -30,7 +30,22 @@ final class RessetViewController: UIViewController {
     }
     
     @objc private func submitButtonTapped() {
+        print("Submit button tapped!")
+        let email = self.emailTextField.text ?? ""
+ 
+        if !Validator.isValidEmail(for: email) {
+            AlertManager.showInvalidEmailAlert(on: self)
+            return
+        }
         
+        AuthService.shared.forgotPassword(with: email) { [weak self] error in
+            guard let self = self else {return}
+            if let error = error {
+                AlertManager.showForgotPasswordErrorSending(on: self, with: error)
+                return
+            }
+            AlertManager.showPasswordResetSent(on: self)
+        }
     }
 }
 
