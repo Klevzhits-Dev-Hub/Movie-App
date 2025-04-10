@@ -41,18 +41,20 @@ final class LoginViewController: UIViewController {
         let label = UILabel()
         label.text = "⎯⎯⎯⎯  Or continue with  ⎯⎯⎯⎯"
         label.font = UIFont.systemFont(ofSize: 16)
+        label.textAlignment = .center
         label.textColor = .gray
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    private let toggleSwitch: UISwitch = {
+    private lazy var toggleSwitch: UISwitch = {
         let toggle = UISwitch()
         toggle.isOn = false
         toggle.onTintColor = .selected
         toggle.thumbTintColor = .white
         toggle.backgroundColor = .systemGray4
         toggle.layer.cornerRadius = 16
+        toggle.addTarget(self, action: #selector(didChangeSwitch), for: .valueChanged)
         toggle.translatesAutoresizingMaskIntoConstraints = false
         return toggle
     }()
@@ -77,7 +79,6 @@ final class LoginViewController: UIViewController {
     private let stackButton: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
-        stack.distribution = .fill
         stack.spacing = 20
         stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
@@ -127,25 +128,92 @@ final class LoginViewController: UIViewController {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-       setupUI()
-       view.backgroundColor = .systemBackground
+        setupUI()
+        view.backgroundColor = .white
     }
-     
+    
+    @objc func didChangeSwitch() {
+        if toggleSwitch.isOn {
+            guard let email = emailTextField.text, !email.isEmpty,
+                  let password = passwordTextField.text, !password.isEmpty else { return }
+//           добавить сохранение и удаление
+        }
+    }
     @objc func signInButtonTapped() {
         print("Sign In button tapped!")
+        
+        let loginRequest = LoginUserRequest(
+            email: emailTextField.text ?? "",
+            password: passwordTextField.text ?? ""
+        )
+        
+        if !Validator.isValidEmail(for: loginRequest.email) {
+            AlertManager.showInvalidEmailAlert(on: self)
+            return
+        }
+        
+        if !Validator.isValidPassword(for: loginRequest.password) {
+            AlertManager.showInvalidPasswordAlert(on: self)
+            return
+        }
+        
+        AuthService.shared.signIn(with: loginRequest) { [weak self] error in
+            guard let self = self else { return }
+            if let error = error {
+                AlertManager.showSignInErrorAlert(on: self, with: error)
+                return
+            }
+            // Перенаправление на домашний экран
+            self.openVC()
+        }
     }
     
     @objc func googleButtonTapped() {
         print("Google button tapped!")
+        guard let clientID = FirebaseApp.app()?.options.clientID else { return }
+        
+        // Создание конфигурации для Google Sign In
+        let config = GIDConfiguration(clientID: clientID)
+        GIDSignIn.sharedInstance.configuration = config
+        
+        GIDSignIn.sharedInstance.signIn(withPresenting: self) { [weak self] result, error in
+            guard let _ = result, error == nil else { return }
+            
+            guard let user = result?.user,
+                  let idToken = user.idToken?.tokenString else { return }
+            
+            self?.signInWithGoogle(idToken: idToken, accessToken: user.accessToken.tokenString)
+        }
+    }
+    func signInWithGoogle(idToken: String, accessToken: String ) {
+        let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
+        
+        Auth.auth().signIn(with: credential) { [weak self] result, error in
+            guard let self = self else { return }
+            if let error = error {
+                AlertManager.showSignInErrorAlert(on: self, with: error)
+                return
+            }
+            // Перенаправление на домашний экран
+            self.openVC()
+        }
+    }
+    private func openVC() {
+        //        let vc = HomeViewController()
+        //        self.navigationController?.pushViewController(vc, animated: true)
+        let vc = ProfileFactory.makeProfileModule()
+        self.navigationController?.pushViewController(vc, animated: true)
+        
+        
     }
     
     @objc func forgotButtonTapped() {
-        print("forgotButton tapped!")
+        print("forgot button tapped!")
         let vc = RessetViewController()
         navigationController?.pushViewController(vc, animated: true)
     }
     @objc func signUpButtonTapped() {
-        print("forgotButton tapped!")
+        print("sign in button tapped!")
         let vc = SignUpViewController()
         navigationController?.pushViewController(vc, animated: true)
     }
@@ -153,8 +221,7 @@ final class LoginViewController: UIViewController {
 }
 // MARK: - Setup ui and constraints
 private extension LoginViewController {
-     func setupUI() {
-        
+    func setupUI() {
         stackField.addArrangedSubview(emailLabel)
         stackField.addArrangedSubview(emailTextField)
         stackField.addArrangedSubview(passwordLabel)
