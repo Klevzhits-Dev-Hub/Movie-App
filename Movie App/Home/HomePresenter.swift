@@ -55,20 +55,25 @@ extension HomePresenter: HomePresenterProtocol {
     }
     
     func categoryTapped(category: String) {
-        
         selectedCategory = category
-        NetworkManager.shared.fetchMoviesByGenre(genre: category.lowercased()) { [weak self] result in
-            switch result {
-            case .success(let response):
-                let filteredMovies = response.docs.filter { $0.name?.isEmpty == false }
-                self?.view?.showMovies(filteredMovies)
-            case .failure(let error):
-                print("Error fetching genres: \(error)")
+        
+        if category != "All" {
+            NetworkManager.shared.fetchMoviesByGenre(genre: category.lowercased()) { [weak self] result in
+                switch result {
+                case .success(let response):
+                    let filteredMovies = response.docs.filter { $0.name?.isEmpty == false }
+                    self?.view?.showMovies(filteredMovies)
+                case .failure(let error):
+                    print("Error fetching genres: \(error)")
+                }
             }
+        } else {
+            self.fetchAllMovies()
         }
     }
     
     func getSelectedCategory() -> String? {
+        print(selectedCategory)
         return selectedCategory
     }
     

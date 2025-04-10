@@ -145,15 +145,9 @@ extension HomeViewController {
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if indexPath.section == 1 {
-            if categories[indexPath.item] == "All" {
-                selectedCategoryIndex = indexPath
-                presenter.fetchAllMovies()
-            } else {
-                selectedCategoryIndex = indexPath
-                let category = categories[indexPath.item]
-                presenter.categoryTapped(category: category)
-                //presenter.categoryTapped(category: categories[indexPath.item])
-            }
+            selectedCategoryIndex = indexPath
+            let category = categories[indexPath.item]
+            presenter.categoryTapped(category: category)
         } else if indexPath.section == 2 {
             collectionView.isHidden = true
             presenter.movieTapped(selectedMovie: displayedMovies[indexPath.item])
