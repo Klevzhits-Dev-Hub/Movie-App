@@ -88,6 +88,59 @@ final class SignUpViewController: UIViewController {
     }
     
     @objc func signUpTapped() {
+        print("Sign Up button tapped!")
+        
+        guard let firstName = firstNameTextField.text, !firstName.isEmpty,
+              let lastName = lastNameTextField.text, !lastName.isEmpty,
+              let email = emailTextField.text, !email.isEmpty,
+              let password = passwordTextField.text, !password.isEmpty,
+              let confirmPassword = confirmPasswordTextField.text, !confirmPassword.isEmpty else {
+            AlertManager.showBasicAlert(on: self, title: "Missing Fields", message: "Please fill in all fields.")
+            return
+        }
+        
+        if password != confirmPassword {
+            AlertManager.showBasicAlert(on: self, title: "Password Mismatch", message: "Passwords do not match.")
+            return
+        }
+        
+        if !Validator.isValidUserName(for: firstName) {
+            AlertManager.showInvalidUserNameAlert(on: self)
+            return
+        }
+        
+        if !Validator.isValidEmail(for: email) {
+            AlertManager.showInvalidEmailAlert(on: self)
+            return
+        }
+        
+        if !Validator.isValidPassword(for: password) {
+            AlertManager.showInvalidPasswordAlert(on: self)
+            return
+        }
+        
+        let registerUserRequest = RegisterUserRequest(
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            password: password
+        )
+        
+        AuthService.shared.registerUser(with: registerUserRequest) { [weak self] wasRegistered, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                AlertManager.showRegistrationErrorAlert(on: self, with: error)
+                return
+            }
+            
+            if wasRegistered {
+                AlertManager.showBasicAlert(on: self, title: "Registration Successful", message: "You can now log in.")
+                self.navigationController?.popViewController(animated: true)
+            } else {
+                AlertManager.showRegistrationErrorAlert(on: self)
+            }
+        }
     }
     
     @objc func loginButtonTapped() {
@@ -142,7 +195,7 @@ private extension SignUpViewController {
             downStack.topAnchor.constraint(equalTo: signUpButton.bottomAnchor, constant: 40),
             downStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             downStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
-     
+            
         ])
     }
 }
