@@ -8,9 +8,7 @@
 import UIKit
 
 final class AlertManager {
-    
-    private static func showBasicAlert(on vc: UIViewController, title: String, message: String?) {
-        
+     static func showBasicAlert(on vc: UIViewController, title: String, message: String?) {
         DispatchQueue.main.async {
             let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: nil))
@@ -19,28 +17,25 @@ final class AlertManager {
     }
 }
 
-//MARK: - validator alert
+// MARK: - Validator Alerts
 extension AlertManager {
-    
     public static func showInvalidEmailAlert(on vc: UIViewController) {
-        self.showBasicAlert(on: vc, title: "Invalid Email", message: "Please enter valid email")
+        self.showBasicAlert(on: vc, title: "Invalid Email", message: "Please enter a valid email.")
     }
     
     public static func showInvalidPasswordAlert(on vc: UIViewController) {
-        self.showBasicAlert(on: vc, title: "Invalid Password", message: "Please enter valid password")
+        self.showBasicAlert(on: vc, title: "Invalid Password", message: "Please enter a valid password.")
     }
     
     public static func showInvalidUserNameAlert(on vc: UIViewController) {
-        self.showBasicAlert(on: vc, title: "Invalid User Name", message: "Please enter valid name")
+        self.showBasicAlert(on: vc, title: "Invalid Username", message: "Please enter a valid username.")
     }
 }
 
-
-//MARK: - ошибка регистрации
+// MARK: - Registration Errors
 extension AlertManager {
-    
     public static func showRegistrationErrorAlert(on vc: UIViewController) {
-        self.showBasicAlert(on: vc, title: "Registration Error", message: "Go to home")
+        self.showBasicAlert(on: vc, title: "Registration Error", message: "An unknown error occurred during registration.")
     }
     
     public static func showRegistrationErrorAlert(on vc: UIViewController, with error: Error) {
@@ -48,34 +43,28 @@ extension AlertManager {
     }
 }
 
-
-//MARK: - ошибка логина
+// MARK: - Sign-In Errors
 extension AlertManager {
-    
     public static func showSignInErrorAlert(on vc: UIViewController) {
-        self.showBasicAlert(on: vc, title: "Unknow Sign In Error", message: nil)
+        self.showBasicAlert(on: vc, title: "Sign-In Error", message: "An unknown error occurred during sign-in.")
     }
     
     public static func showSignInErrorAlert(on vc: UIViewController, with error: Error) {
-        self.showBasicAlert(on: vc, title: "Sign In Error", message: "\(error.localizedDescription)")
+        self.showBasicAlert(on: vc, title: "Sign-In Error", message: "\(error.localizedDescription)")
     }
 }
 
-
-//MARK: - ошибка выхода
+// MARK: - Logout Errors
 extension AlertManager {
-    
     public static func showLogoutError(on vc: UIViewController, with error: Error) {
-        self.showBasicAlert(on: vc, title: "Log out Error", message: "\(error.localizedDescription)")
+        self.showBasicAlert(on: vc, title: "Logout Error", message: "\(error.localizedDescription)")
     }
 }
 
-
-//MARK: - ошибка забыли пароль
+// MARK: - Forgot Password Errors
 extension AlertManager {
-    
     public static func showPasswordResetSent(on vc: UIViewController) {
-        self.showBasicAlert(on: vc, title: "Password reset sent", message: nil)
+        self.showBasicAlert(on: vc, title: "Password Reset Sent", message: "Check your email for instructions.")
     }
     
     public static func showForgotPasswordErrorSending(on vc: UIViewController, with error: Error) {
@@ -83,15 +72,9 @@ extension AlertManager {
     }
 }
 
-
-//MARK: - Fetching User Errors
+// MARK: - Fetching User Errors
 extension AlertManager {
-    
-    public static func showUnknowFetchingError(on vc: UIViewController) {
-        self.showBasicAlert(on: vc, title: "Password reset sent", message: nil)
-    }
-   
     public static func showFetchingUserError(on vc: UIViewController, with error: Error) {
-        self.showBasicAlert(on: vc, title: "Unknow Fetching Error", message: "\(error.localizedDescription)")
+        self.showBasicAlert(on: vc, title: "Fetching User Error", message: "\(error.localizedDescription)")
     }
 }
