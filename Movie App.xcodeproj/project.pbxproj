@@ -7,7 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		16717DE52DA019990051DD72 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 16717DE42DA019990051DD72 /* SnapKit */; };
+		166FA33F2D9BD9DC005FE483 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 166FA33E2D9BD9DC005FE483 /* SnapKit */; };
+		466BD81E2DA1CEBA004298EF /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 466BD81D2DA1CEBA004298EF /* FirebaseCore */; };
+		466BD8202DA1CEE7004298EF /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 466BD81F2DA1CEE7004298EF /* FirebaseAuth */; };
+		466BD8222DA1CF02004298EF /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 466BD8212DA1CF02004298EF /* FirebaseStorage */; };
+		466BD8252DA1D0DE004298EF /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 466BD8242DA1D0DE004298EF /* GoogleSignIn */; };
+		466BD8272DA1D0DE004298EF /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 466BD8262DA1D0DE004298EF /* GoogleSignInSwift */; };
+		466BD82C2DA1D317004298EF /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 466BD82B2DA1D317004298EF /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,7 +46,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				16717DE52DA019990051DD72 /* SnapKit in Frameworks */,
+				466BD8252DA1D0DE004298EF /* GoogleSignIn in Frameworks */,
+				466BD81E2DA1CEBA004298EF /* FirebaseCore in Frameworks */,
+				466BD8222DA1CF02004298EF /* FirebaseStorage in Frameworks */,
+				466BD8272DA1D0DE004298EF /* GoogleSignInSwift in Frameworks */,
+				466BD8202DA1CEE7004298EF /* FirebaseAuth in Frameworks */,
+				166FA33F2D9BD9DC005FE483 /* SnapKit in Frameworks */,
+				466BD82C2DA1D317004298EF /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,7 +95,13 @@
 			);
 			name = "Movie App";
 			packageProductDependencies = (
-				16717DE42DA019990051DD72 /* SnapKit */,
+				166FA33E2D9BD9DC005FE483 /* SnapKit */,
+				466BD81D2DA1CEBA004298EF /* FirebaseCore */,
+				466BD81F2DA1CEE7004298EF /* FirebaseAuth */,
+				466BD8212DA1CF02004298EF /* FirebaseStorage */,
+				466BD8242DA1D0DE004298EF /* GoogleSignIn */,
+				466BD8262DA1D0DE004298EF /* GoogleSignInSwift */,
+				466BD82B2DA1D317004298EF /* FirebaseFirestore */,
 			);
 			productName = "Movie App";
 			productReference = 166F9FCD2D99B928005FE483 /* Movie App.app */;
@@ -114,7 +132,9 @@
 			mainGroup = 166F9FC42D99B928005FE483;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				16717DE32DA019990051DD72 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				166FA33D2D9BD9DC005FE483 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				466BD81A2DA1CCFA004298EF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				466BD8232DA1D0DE004298EF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 166F9FCE2D99B928005FE483 /* Products */;
@@ -354,7 +374,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		16717DE32DA019990051DD72 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+		166FA33D2D9BD9DC005FE483 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SnapKit/SnapKit";
 			requirement = {
@@ -362,13 +382,59 @@
 				minimumVersion = 5.7.1;
 			};
 		};
+		466BD81A2DA1CCFA004298EF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.11.0;
+			};
+		};
+		466BD8232DA1D0DE004298EF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		16717DE42DA019990051DD72 /* SnapKit */ = {
+		166FA33E2D9BD9DC005FE483 /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 16717DE32DA019990051DD72 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			package = 166FA33D2D9BD9DC005FE483 /* XCRemoteSwiftPackageReference "SnapKit" */;
 			productName = SnapKit;
+		};
+		466BD81D2DA1CEBA004298EF /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 466BD81A2DA1CCFA004298EF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		466BD81F2DA1CEE7004298EF /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 466BD81A2DA1CCFA004298EF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		466BD8212DA1CF02004298EF /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 466BD81A2DA1CCFA004298EF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		466BD8242DA1D0DE004298EF /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 466BD8232DA1D0DE004298EF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		466BD8262DA1D0DE004298EF /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 466BD8232DA1D0DE004298EF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		466BD82B2DA1D317004298EF /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 466BD81A2DA1CCFA004298EF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

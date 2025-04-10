@@ -9,7 +9,7 @@ import Foundation
 
 final class NetworkManager {
     static let shared = NetworkManager()
-    private let apiKey = "1E0WW96-HB8M6SK-NB8MQ7C-DE2TBXD"
+    private let apiKey = "5P6G0J5-NDY4F34-PJ6KRX3-R8RAA7X"
     private let baseURL = "https://api.kinopoisk.dev/v1.4/"
     
     private init() {}

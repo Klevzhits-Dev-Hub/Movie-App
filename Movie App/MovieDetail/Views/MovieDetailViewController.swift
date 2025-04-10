@@ -183,7 +183,6 @@ final class MovieDetailViewController: UIViewController {
     lazy var dataElements = makeStackView(image: UIImage(named: "dataImage"), view: dataLabel )
     lazy var genreElements = makeStackView(image: UIImage(named: "filmIconImage"), view: genreLabel)
     
-
     
     init(movieId: Int) {
         self.presenter = MovieDetailPresenter(movieId: movieId)
@@ -314,8 +313,6 @@ final class MovieDetailViewController: UIViewController {
         heartButton.addTarget(self, action: #selector(addToFavoriteButtonTapped), for: .touchUpInside)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: heartButton)
     }
-    
-
 }
 
 // MARK: - MovieDetailViewProtocol

@@ -14,6 +14,7 @@ protocol MovieDetailPresenterProtocol: AnyObject {
     func getActorsCount() -> Int
     func getActor(at index: Int) -> Person?
     func getTrailerURL() -> URL?
+
     func toggleLike()
     func isMovieLiked() -> Bool
 }
