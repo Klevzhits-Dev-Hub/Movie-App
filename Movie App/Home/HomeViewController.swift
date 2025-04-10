@@ -20,6 +20,7 @@ protocol HomeViewProtocol: AnyObject {
     func showMovies(_ movies: [Movie])
     func showCategories(_ categories: [String])
     func showBoxOfficeMovies(_ movies: [Movie])
+    func highlightSelectedCategory(_ category: String)
     func navigateToMovieDetail(movieId: Int)
 }
 
@@ -49,15 +50,17 @@ final class HomeViewController: UICollectionViewController{
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        presenter.highlightCurrentCategory()
+    
         
-        collectionView.alpha = 0
-        collectionView.isHidden = true
-        loader.startAnimating()
+        //collectionView.alpha = 0
+        //collectionView.isHidden = true
+        //loader.startAnimating()
 
-        didReceiveCategories = false
-        didReceiveMovies = false
+        //didReceiveCategories = false
+        //didReceiveMovies = false
 
-        presenter.fetchCategories()
+        //presenter.fetchCategories()
         
     }
             
@@ -126,6 +129,17 @@ extension HomeViewController: HomeViewProtocol {
         }
     }
     
+    func highlightSelectedCategory(_ category: String) {
+        guard let index = categories.firstIndex(of: category) else { return }
+           let indexPath = IndexPath(item: index, section: 1)
+
+           DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+               self.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+               self.collectionView.delegate?.collectionView?(self.collectionView, didSelectItemAt: indexPath)
+               self.selectedCategoryIndex = indexPath
+           }
+    }
+    
     func navigateToMovieDetail(movieId: Int) {
         let detailVC = MovieDetailViewController(movieId: movieId)
         navigationController?.pushViewController(detailVC, animated: true)
@@ -174,7 +188,7 @@ extension HomeViewController {
             let category = categories[indexPath.item]
             presenter.categoryTapped(category: category)
         } else if indexPath.section == 2 {
-            collectionView.isHidden = true
+            //collectionView.isHidden = true
             presenter.movieTapped(selectedMovie: displayedMovies[indexPath.item])
         }
     }

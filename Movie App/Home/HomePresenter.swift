@@ -12,6 +12,7 @@ protocol HomePresenterProtocol: AnyObject {
     func categoryTapped(category: String)
     func getSelectedCategory() -> String?
     func movieTapped(selectedMovie: Movie)
+    func highlightCurrentCategory()
     func toggleFavourite()
     func seeAllTapped()
 }
@@ -86,6 +87,12 @@ extension HomePresenter: HomePresenterProtocol {
             }
         } else {
             self.fetchAllMovies()
+        }
+    }
+    
+    func highlightCurrentCategory() {
+        if let category = selectedCategory {
+            view?.highlightSelectedCategory(category)
         }
     }
     
