@@ -17,9 +17,9 @@ class CarouselViewController: UIViewController, UICollectionViewDelegate, UIColl
         
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.itemSize = CGSize(width: 150, height: 300)
-        layout.sectionInset = UIEdgeInsets(top: 0, left: -30, bottom: 0, right: 0)
-        layout.minimumInteritemSpacing = 20
+        layout.itemSize = CGSize(width: 220, height: 300)
+        layout.sectionInset = UIEdgeInsets(top: 0, left: -140, bottom: 0, right: 0)
+        layout.minimumInteritemSpacing = 15
         
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         
@@ -82,9 +82,24 @@ class CarouselViewController: UIViewController, UICollectionViewDelegate, UIColl
     func applyCellTransformations() {
         let centerX = collectionView!.contentOffset.x + (collectionView!.frame.width / 2)
 
-        let maxRotationAngle: CGFloat = 10.0 // Максимальный угол поворота в градусах
+        let maxRotationAngle: CGFloat = 10.0
         let maxScale: CGFloat = 1.0
-        let minScale: CGFloat = 0.75  // Уменьшение
+        let minScale: CGFloat = 0.85
+
+        var closestCell: UICollectionViewCell?
+        var minDistance: CGFloat = CGFloat.greatestFiniteMagnitude
+
+        for cell in collectionView!.visibleCells {
+            guard let indexPath = collectionView!.indexPath(for: cell),
+                  let attributes = collectionView!.layoutAttributesForItem(at: indexPath) else { continue }
+
+            let distanceFromCenter = abs(centerX - attributes.frame.midX)
+
+            if distanceFromCenter < minDistance {
+                minDistance = distanceFromCenter
+                closestCell = cell
+            }
+        }
 
         for cell in collectionView!.visibleCells {
             guard let indexPath = collectionView!.indexPath(for: cell),
@@ -96,6 +111,11 @@ class CarouselViewController: UIViewController, UICollectionViewDelegate, UIColl
             let rotationAngle = -normalizedDistance * maxRotationAngle
             let scale = abs(normalizedDistance) < 0.27 ? maxScale : minScale
 
+            if let movieCell = cell as? CarouselMovieCell {
+                let isCentered = cell == closestCell
+                movieCell.setLabelsVisible(isCentered)
+            }
+
             cell.transform = CGAffineTransform(scaleX: scale, y: scale)
                 .rotated(by: rotationAngle * .pi / 180)
         }
@@ -106,7 +126,7 @@ class CarouselViewController: UIViewController, UICollectionViewDelegate, UIColl
 
         let maxRotationAngle: CGFloat = 10.0 // Максимальный угол поворота в градусах
         let maxScale: CGFloat = 1.0
-        let minScale: CGFloat = 0.75  // Уменьшение
+        let minScale: CGFloat = 0.85  // Уменьшение
 
         var closestCell: UICollectionViewCell?
         var minDistance: CGFloat = CGFloat.greatestFiniteMagnitude
@@ -137,6 +157,12 @@ class CarouselViewController: UIViewController, UICollectionViewDelegate, UIColl
 
             // Определяем масштаб для ячейки
             let scale = abs(normalizedDistance) > 0.30 ? minScale : maxScale
+
+            // 👇 Показываем/скрываем лейблы только у центральной ячейки
+            if let movieCell = cell as? CarouselMovieCell {
+                let isCentered = cell == closestCell
+                movieCell.setLabelsVisible(isCentered)
+            }
 
             // Если ячейка является ближайшей к центру, увеличиваем ее до максимума, остальные — уменьшаем
             if cell == closestCell {
