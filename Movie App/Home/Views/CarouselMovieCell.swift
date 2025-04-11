@@ -18,14 +18,12 @@ class CarouselMovieCell: UICollectionViewCell {
         return iv
     }()
     
-    // Добавим замыкание
     var didTap: (() -> Void)?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         contentView.addSubview(imageView)
-        
-        // Gesture recognizer
+
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         contentView.addGestureRecognizer(tap)
         contentView.isUserInteractionEnabled = true
@@ -42,7 +40,10 @@ class CarouselMovieCell: UICollectionViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         imageView.frame = contentView.bounds
+        addBottomToTopGradient(to: imageView)
     }
+    
+    
     
     func configure(with movie: Movie) {
         if let urlString = movie.poster?.url {
@@ -58,5 +59,20 @@ class CarouselMovieCell: UICollectionViewCell {
         super.prepareForReuse()
         imageView.image = nil
         didTap = nil
+    }
+    
+    func addBottomToTopGradient(to view: UIView) {
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.frame = CGRect(x: 0, y: view.bounds.height - 150, width: view.bounds.width, height: 150)
+
+        gradientLayer.colors = [
+            UIColor(named: "AccentColor")?.withAlphaComponent(1.0).cgColor, // снизу
+            UIColor(named: "AccentColor")?.withAlphaComponent(0.0).cgColor  // к верху
+        ]
+        
+        gradientLayer.startPoint = CGPoint(x: 0.5, y: 1.0) // снизу
+        gradientLayer.endPoint = CGPoint(x: 0.5, y: 0.0)   // вверх
+
+        view.layer.addSublayer(gradientLayer)
     }
 }

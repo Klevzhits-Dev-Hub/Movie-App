@@ -10,6 +10,7 @@ import UIKit
 class BoxOfficeMovieCell: UICollectionViewCell {
     
     static let identifier = "BoxOfficeMovieCell"
+    private var movie: Movie?
     
     let movieImageView: UIImageView = {
         let iv = UIImageView()
@@ -79,7 +80,7 @@ class BoxOfficeMovieCell: UICollectionViewCell {
     
     let favourtiteButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "suit.heart"), for: .normal)
+        //button.setImage(UIImage(systemName: "suit.heart"), for: .normal)
         button.tintColor = .systemGray
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -167,11 +168,14 @@ class BoxOfficeMovieCell: UICollectionViewCell {
     }
     
     @objc func toggleFavourite() {
-        print("tapped")
-        
+        if let movie {
+            CoreDataManager.shared.toggleLike(movie: movie)
+            setFavouriteButtonColor(with: movie)
+        }
     }
     
     func configure(with movie: Movie) {
+        self.movie = movie
         titleLabel.text = movie.name
         genreLabel.text = (movie.genres?[0].name ?? "").capitalized
         durationLabel.text = movie.durationString
@@ -190,6 +194,17 @@ class BoxOfficeMovieCell: UICollectionViewCell {
                     self?.movieImageView.image = img
                 }
             }
+        }
+        
+        setFavouriteButtonColor(with: movie)
+    }
+    
+    func setFavouriteButtonColor(with movie: Movie) {
+        if CoreDataManager.shared.containsMovie(withId: movie.id) {
+            favourtiteButton.setImage(UIImage(systemName: "heart.fill"), for: .normal)
+            favourtiteButton.tintColor = UIColor(named: "AccentColor")
+        } else {
+            favourtiteButton.setImage(UIImage(systemName: "suit.heart"), for: .normal)
         }
     }
 }

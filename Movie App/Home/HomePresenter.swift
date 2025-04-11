@@ -13,7 +13,7 @@ protocol HomePresenterProtocol: AnyObject {
     func getSelectedCategory() -> String?
     func movieTapped(selectedMovie: Movie)
     func highlightCurrentCategory()
-    func toggleFavourite()
+    func toggleFavourite(movie: Movie)
     func seeAllTapped()
 }
 
@@ -107,7 +107,8 @@ extension HomePresenter: HomePresenterProtocol {
         view?.navigateToMovieDetail(movieId: selectedMovie.id)
     }
     
-    func toggleFavourite() {
+    func toggleFavourite(movie: Movie) {
+        CoreDataManager.shared.toggleLike(movie: movie)
         print("Toggle Favotites")
     }
     
