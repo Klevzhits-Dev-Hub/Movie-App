@@ -12,6 +12,7 @@ import FirebaseAuth
 final class LoginViewController: UIViewController {
     
     // MARK: - Properties
+    
     private lazy var titleLabel: UILabel = {
         let element = UILabel()
         element.text = "Login"
@@ -59,7 +60,7 @@ final class LoginViewController: UIViewController {
         return toggle
     }()
     
-    private let stackField: UIStackView = {
+    private lazy var stackField: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.distribution = .fill
@@ -68,7 +69,7 @@ final class LoginViewController: UIViewController {
         return stack
     }()
     
-    private let horizontalStack: UIStackView = {
+    private lazy var  horizontalStack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.spacing = 30
@@ -76,7 +77,7 @@ final class LoginViewController: UIViewController {
         return stack
     }()
     
-    private let stackButton: UIStackView = {
+    private lazy var  stackButton: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = 20
@@ -89,6 +90,7 @@ final class LoginViewController: UIViewController {
         stack.axis = .horizontal
         stack.spacing = 5
         stack.alignment = .center
+        stack.isUserInteractionEnabled = true
         stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
@@ -103,7 +105,7 @@ final class LoginViewController: UIViewController {
         return button
     }()
     
-    private let dontLabel: UILabel = {
+    private lazy var  dontLabel: UILabel = {
         let label = UILabel()
         label.text = "Don’t have an account?"
         label.font = UIFont.systemFont(ofSize: 15)
@@ -122,23 +124,29 @@ final class LoginViewController: UIViewController {
     }()
     
     private lazy var signInButton = UIButton.makeCustomButton(title: "Sign in", target: self, action: #selector(signInButtonTapped))
-    
-    private lazy var loginGoogleButton = UIButton.makeGoogleButton(title: "Continue with Google", target: self, action: #selector(googleButtonTapped))
+    private lazy var googleButton = UIButton.makeGoogleButton(title: "Continue with Google", target: self, action: #selector(googleButtonTapped))
     
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         view.backgroundColor = .white
+        loadRememberMeState()
     }
     
-    @objc func didChangeSwitch() {
-        if toggleSwitch.isOn {
-            guard let email = emailTextField.text, !email.isEmpty,
-                  let password = passwordTextField.text, !password.isEmpty else { return }
-//           добавить сохранение и удаление
-        }
+    @objc func didChangeSwitch(_ sender: UISwitch) {
+        print("Remember Me switch toggled: \(sender.isOn)")
+        saveRememberMeState(isOn: sender.isOn)
     }
+    
+    private func saveRememberMeState(isOn: Bool) {
+        UserDefaults.standard.set(isOn, forKey: "rememberMe")
+    }
+    
+    private func loadRememberMeState() {
+        toggleSwitch.isOn = UserDefaults.standard.bool(forKey: "rememberMe")
+    }
+    
     @objc func signInButtonTapped() {
         print("Sign In button tapped!")
         
@@ -175,25 +183,20 @@ final class LoginViewController: UIViewController {
         // Создание конфигурации для Google Sign In
         let config = GIDConfiguration(clientID: clientID)
         GIDSignIn.sharedInstance.configuration = config
-        
+
         GIDSignIn.sharedInstance.signIn(withPresenting: self) { [weak self] result, error in
-            guard let _ = result, error == nil else { return }
-            
-            guard let user = result?.user,
-                  let idToken = user.idToken?.tokenString else { return }
-            
+            guard let _ = result, error == nil else {return}
+
+          guard let user = result?.user,
+                let idToken = user.idToken?.tokenString else {return}
             self?.signInWithGoogle(idToken: idToken, accessToken: user.accessToken.tokenString)
         }
     }
     func signInWithGoogle(idToken: String, accessToken: String ) {
         let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
         
-        Auth.auth().signIn(with: credential) { [weak self] result, error in
-            guard let self = self else { return }
-            if let error = error {
-                AlertManager.showSignInErrorAlert(on: self, with: error)
-                return
-            }
+        Auth.auth().signIn(with: credential) { result, error in
+            guard let _ = result, error == nil else {return}
             // Перенаправление на домашний экран
             self.openVC()
         }
@@ -203,8 +206,6 @@ final class LoginViewController: UIViewController {
         //        self.navigationController?.pushViewController(vc, animated: true)
         let vc = ProfileFactory.makeProfileModule()
         self.navigationController?.pushViewController(vc, animated: true)
-        
-        
     }
     
     @objc func forgotButtonTapped() {
@@ -233,7 +234,7 @@ private extension LoginViewController {
         
         stackButton.addArrangedSubview(signInButton)
         stackButton.addArrangedSubview(orLabel)
-        stackButton.addArrangedSubview(loginGoogleButton)
+        stackButton.addArrangedSubview(googleButton)
         
         downStack.addArrangedSubview(dontLabel)
         downStack.addArrangedSubview(signUpButton)
@@ -255,7 +256,7 @@ private extension LoginViewController {
             stackButton.topAnchor.constraint(equalTo: horizontalStack.bottomAnchor, constant: 40),
             stackButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 30),
             stackButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -30),
-            stackButton.bottomAnchor.constraint(equalTo: downStack.topAnchor, constant: 50),
+            stackButton.bottomAnchor.constraint(equalTo: downStack.topAnchor, constant: -50),
             
             downStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             downStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)

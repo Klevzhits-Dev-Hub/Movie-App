@@ -15,6 +15,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         FirebaseApp.configure()
+        
+        GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
+           if let error = error {
+                print("Error restoring previous sign in: \(error.localizedDescription)")
+            } else {
+                print("Successfully restored previous sign in: \(String(describing: user))")
+            }
+        }
         return true
     }
 
