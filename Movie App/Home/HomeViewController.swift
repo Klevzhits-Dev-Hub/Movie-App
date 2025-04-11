@@ -28,14 +28,14 @@ final class HomeViewController: UICollectionViewController{
     //MARK: - Properties
     private let presenter: HomePresenterProtocol
     private var displayedMovies = [Movie]()
-    private var carouselMovies: [Movie] = []
+    private var carouselMovies = [Movie]()
     private var categories = [String]()
     private var selectedCategoryIndex: IndexPath?
+
     private var didReceiveCategories = false
     private var didReceiveMovies = false
-    
+
     private let loader = UIActivityIndicatorView(style: .large)
-    private var isInitialDataLoaded = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,25 +43,14 @@ final class HomeViewController: UICollectionViewController{
         setupLargeNavBar()
         setupCollectionVIew()
         setupLoader()
-        presenter.fetchCategories()
-        
+
         collectionView.alpha = 0
+        presenter.fetchCategories()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         presenter.highlightCurrentCategory()
-    
-        
-        //collectionView.alpha = 0
-        //collectionView.isHidden = true
-        //loader.startAnimating()
-
-        //didReceiveCategories = false
-        //didReceiveMovies = false
-
-        //presenter.fetchCategories()
-        
     }
             
     init(presenter: HomePresenterProtocol) {
@@ -72,6 +61,8 @@ final class HomeViewController: UICollectionViewController{
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    
 }
 
 // MARK: - Protocol Methods
@@ -79,65 +70,64 @@ extension HomeViewController: HomeViewProtocol {
     func showCategories(_ categories: [String]) {
         self.categories = categories
         didReceiveCategories = true
+        
         DispatchQueue.main.async {
             self.collectionView.reloadData()
+            self.selectCategoryIfNeeded()
+            self.checkIfLoadingCompleted()
+        }
+    }
+    
+    private func selectCategoryIfNeeded() {
+        let selectedCategory = presenter.getSelectedCategory()
+        let itemIndex = selectedCategory.flatMap { categories.firstIndex(of: $0) } ?? 0
+        let indexPath = IndexPath(item: itemIndex, section: 1)
 
-            let selectedCategory = self.presenter.getSelectedCategory()
-            let itemIndex = selectedCategory.flatMap { categories.firstIndex(of: $0) } ?? 0
-            let indexPath = IndexPath(item: itemIndex, section: 1)
-
-            self.selectedCategoryIndex = indexPath
-            self.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
-            self.collectionView.delegate?.collectionView?(self.collectionView, didSelectItemAt: indexPath)
-            
+        selectedCategoryIndex = indexPath
+        collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+        collectionView.delegate?.collectionView?(collectionView, didSelectItemAt: indexPath)
+    }
+    
+    private func reloadRelevantSections(_ sections: [Int]) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            if self.collectionView.numberOfSections > 2 {
+                self.collectionView.reloadSections(IndexSet(sections))
+            } else {
+                self.collectionView.reloadData()
+            }
             self.checkIfLoadingCompleted()
         }
     }
     
     func showMovies(_ movies: [Movie]) {
         self.displayedMovies = movies
-        
+
         if carouselMovies.isEmpty {
-            carouselMovies = Array(displayedMovies
-                .filter { $0.poster?.url != nil }
-                .shuffled()
-                .prefix(10))
+            carouselMovies = Array(movies.filter { $0.poster?.url != nil }.shuffled().prefix(10))
         }
-    
+
         didReceiveMovies = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-            if self.collectionView.numberOfSections > 2 {
-                self.collectionView.reloadSections(IndexSet([0, 2]))
-                self.collectionView.reloadSections(IndexSet(integer: 2))
-            } else {
-                self.collectionView.reloadData()
-            }
-            self.checkIfLoadingCompleted()
-        }
+        reloadRelevantSections([0, 2])
     }
-    
+        
     func showBoxOfficeMovies(_ movies: [Movie]) {
         self.displayedMovies = movies
         didReceiveMovies = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-            if self.collectionView.numberOfSections > 2 {
-                self.collectionView.reloadSections(IndexSet(integer: 2))
-            } else {
-                self.collectionView.reloadData()
-            }
-            self.checkIfLoadingCompleted()
-        }
+        reloadRelevantSections([2])
     }
     
     func highlightSelectedCategory(_ category: String) {
         guard let index = categories.firstIndex(of: category) else { return }
-           let indexPath = IndexPath(item: index, section: 1)
+        let indexPath = IndexPath(item: index, section: 1)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.selectCategory(at: indexPath)
+        }
+    }
 
-           DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-               self.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
-               self.collectionView.delegate?.collectionView?(self.collectionView, didSelectItemAt: indexPath)
-               self.selectedCategoryIndex = indexPath
-           }
+    private func selectCategory(at indexPath: IndexPath) {
+        selectedCategoryIndex = indexPath
+        collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+        collectionView.delegate?.collectionView?(collectionView, didSelectItemAt: indexPath)
     }
     
     func navigateToMovieDetail(movieId: Int) {
@@ -148,6 +138,7 @@ extension HomeViewController: HomeViewProtocol {
 
 // MARK: - CollectionVIew Settings
 extension HomeViewController {
+    
     func setupCollectionVIew() {
         collectionView.register(CarouselHeaderView.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
@@ -162,10 +153,13 @@ extension HomeViewController {
         return .init(width: view.frame.width, height: 250)
     }
     
-    
     static func createLayout() -> UICollectionViewCompositionalLayout {
         return UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
-            return createSection(for: sectionIndex, layoutEnvironment: layoutEnvironment)
+            switch sectionIndex {
+            case 0: return createCarouselSection()
+            case 1: return createCategorySection()
+            default: return createBoxOfficeSection()
+            }
         }
     }
     
@@ -174,22 +168,28 @@ extension HomeViewController {
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if section == 0 {
-            return 8
-        } else if section == 1 {
+        switch section {
+        case 0:
+            return carouselMovies.count
+        case 1:
             return categories.count
+        case 2:
+            return displayedMovies.count
+        default:
+            return 0
         }
-        return displayedMovies.count
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if indexPath.section == 1 {
+        switch indexPath.section {
+        case 1:
             selectedCategoryIndex = indexPath
             let category = categories[indexPath.item]
             presenter.categoryTapped(category: category)
-        } else if indexPath.section == 2 {
-            //collectionView.isHidden = true
+        case 2:
             presenter.movieTapped(selectedMovie: displayedMovies[indexPath.item])
+        default:
+            break
         }
     }
 }
@@ -198,78 +198,124 @@ extension HomeViewController {
 extension HomeViewController: UICollectionViewDelegateFlowLayout {
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if indexPath.section == 0 {
+        switch indexPath.section {
+        case 0:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ReuseIdentifier.defaultCell, for: indexPath)
             cell.backgroundColor = .lightGray
-            
             return cell
-        } else if indexPath.section == 1 {
+        case 1:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CategoryCell.identifier, for: indexPath) as! CategoryCell
             cell.configure(with: categories[indexPath.item])
             return cell
+        case 2:
+            let movie = displayedMovies[indexPath.item]
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: BoxOfficeMovieCell.identifier, for: indexPath) as! BoxOfficeMovieCell
+            cell.configure(with: movie)
+            return cell
+        default:
+            fatalError("Unexpected section")
         }
-        let movie = displayedMovies[indexPath.item]
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: BoxOfficeMovieCell.identifier, for: indexPath) as! BoxOfficeMovieCell
-        cell.configure(with: movie)
-        return cell
     }
     
-    private static func createSection(for sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? {
-        if sectionIndex == 0 {
-            let item = NSCollectionLayoutItem(
-                        layoutSize: NSCollectionLayoutSize(
-                            widthDimension: .fractionalWidth(1),
-                            heightDimension: .absolute(0)
-                        )
-                    )
+    private static func createCarouselSection() -> NSCollectionLayoutSection {
+        let item = NSCollectionLayoutItem(
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .absolute(0)
+            )
+        )
 
-                    let group = NSCollectionLayoutGroup.vertical(
-                        layoutSize: NSCollectionLayoutSize(
-                            widthDimension: .fractionalWidth(1),
-                            heightDimension: .absolute(0)
-                        ),
-                        subitems: [item]
-                    )
+        let group = NSCollectionLayoutGroup.vertical(
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .absolute(0)
+            ),
+            subitems: [item]
+        )
 
-                    let section = NSCollectionLayoutSection(group: group)
-    
-                    section.boundarySupplementaryItems = [
-                        NSCollectionLayoutBoundarySupplementaryItem(
-                            layoutSize: NSCollectionLayoutSize(
-                                widthDimension: .fractionalWidth(1),
-                                heightDimension: .absolute(300)
-                            ),
-                            elementKind: UICollectionView.elementKindSectionHeader,
-                            alignment: .top
-                        )
-                    ]
-                    return section
-        
-        } else if sectionIndex == 1 {
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .estimated(1), heightDimension: .absolute(60)))
-            item.contentInsets.bottom = 16
-        
-            let group = NSCollectionLayoutGroup.horizontal(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(70)), subitems: [item])
-            
-            group.interItemSpacing = .fixed(15)
-            
-            let section = NSCollectionLayoutSection(group: group)
-            section.orthogonalScrollingBehavior = .continuous
-            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0)
-            section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: SectionKind.categoryHeader, alignment: .topLeading)]
-            return section
-            
-        } else {
-            let item = NSCollectionLayoutItem(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .absolute(150)))
-            item.contentInsets.bottom = 16
-        
-            let group = NSCollectionLayoutGroup.vertical(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(150 * 5 + 16 * 4)), subitems: [item])
-            let section = NSCollectionLayoutSection(group: group)
-            section.contentInsets.leading = 20
-            section.contentInsets.trailing = 20
-            section.boundarySupplementaryItems = [.init(layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50)), elementKind: SectionKind.boxOfficeHeader, alignment: .topLeading)]
-            return section
-        }
+        let section = NSCollectionLayoutSection(group: group)
+        section.boundarySupplementaryItems = [
+            NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1),
+                    heightDimension: .absolute(300)
+                ),
+                elementKind: UICollectionView.elementKindSectionHeader,
+                alignment: .top
+            )
+        ]
+        return section
+    }
+
+    private static func createCategorySection() -> NSCollectionLayoutSection {
+        let item = NSCollectionLayoutItem(
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .estimated(1),
+                heightDimension: .absolute(60)
+            )
+        )
+        item.contentInsets.bottom = 16
+
+        let group = NSCollectionLayoutGroup.horizontal(
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .estimated(70)
+            ),
+            subitems: [item]
+        )
+        group.interItemSpacing = .fixed(15)
+
+        let section = NSCollectionLayoutSection(group: group)
+        section.orthogonalScrollingBehavior = .continuous
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0)
+
+        section.boundarySupplementaryItems = [
+            NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1),
+                    heightDimension: .estimated(50)
+                ),
+                elementKind: SectionKind.categoryHeader,
+                alignment: .topLeading
+            )
+        ]
+
+        return section
+    }
+
+    private static func createBoxOfficeSection() -> NSCollectionLayoutSection {
+        let item = NSCollectionLayoutItem(
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .absolute(150)
+            )
+        )
+        item.contentInsets.bottom = 16
+
+        let group = NSCollectionLayoutGroup.vertical(
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .estimated(150 * 5 + 16 * 4)
+            ),
+            subitems: [item]
+        )
+
+        let section = NSCollectionLayoutSection(group: group)
+        section.contentInsets.leading = 20
+        section.contentInsets.trailing = 20
+
+        section.boundarySupplementaryItems = [
+            NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1),
+                    heightDimension: .estimated(50)
+                ),
+                elementKind: SectionKind.boxOfficeHeader,
+                alignment: .topLeading
+            )
+        ]
+
+        return section
     }
 }
 

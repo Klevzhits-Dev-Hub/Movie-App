@@ -33,6 +33,8 @@ class CarouselHeaderView: UICollectionReusableView {
     }
     
     func configure(with movies: [Movie], onMovieTapped: @escaping (Movie) -> Void) {
+        guard !isConfigured else { return }
+        isConfigured = true
         carouselVC.configure(with: movies)
         carouselVC.onMovieTapped = onMovieTapped
     }

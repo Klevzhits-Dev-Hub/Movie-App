@@ -32,6 +32,7 @@ final class HomePresenter {
 
 // MARK: - SettingPresenterProtocol
 extension HomePresenter: HomePresenterProtocol {
+    
     func fetchCategories() {
         var fetchedCategories: [String] = []
         NetworkManager.shared.fetchGenres { [weak self] result in
@@ -45,12 +46,12 @@ extension HomePresenter: HomePresenterProtocol {
         }
     }
     
+    
     func fetchAllMovies() {
         let key = "all"
         
         if let cached = moviesCache[key] {
             self.view?.showBoxOfficeMovies(cached)
-            print("DEBUGGGGG")
             return
         }
         
@@ -70,30 +71,32 @@ extension HomePresenter: HomePresenterProtocol {
         let key = category.lowercased()
 
         if let cached = moviesCache[key] {
-            self.view?.showBoxOfficeMovies(cached)
+            view?.showBoxOfficeMovies(cached)
             return
         }
 
-        if category != "All" {
+        switch category {
+        case "All":
+            fetchAllMovies()
+            
+        default:
             NetworkManager.shared.fetchMoviesByGenre(genre: key) { [weak self] result in
+                guard let self else { return }
                 switch result {
                 case .success(let response):
-                    let filteredMovies = response.docs.filter { $0.name?.isEmpty == false }
-                    self?.moviesCache[key] = filteredMovies
-                    self?.view?.showBoxOfficeMovies(filteredMovies)
+                    let filteredMovies = response.docs.filter { !($0.name?.isEmpty ?? true) }
+                    self.moviesCache[key] = filteredMovies
+                    self.view?.showBoxOfficeMovies(filteredMovies)
                 case .failure(let error):
                     print("Error fetching genres: \(error)")
                 }
             }
-        } else {
-            self.fetchAllMovies()
         }
     }
     
     func highlightCurrentCategory() {
-        if let category = selectedCategory {
-            view?.highlightSelectedCategory(category)
-        }
+        guard let category = selectedCategory else { return }
+        view?.highlightSelectedCategory(category)
     }
     
     func getSelectedCategory() -> String? {
