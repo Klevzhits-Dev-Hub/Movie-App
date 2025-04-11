@@ -18,10 +18,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let tabBarController = UITabBarController()
         
-        let searchViewController = ViewController()
+        let searchViewController = SearchViewController()
         let recentWatchViewController = RecentWatchFactory.makeRecentWatchViewModel()
-        let homeViewController = UINavigationController(rootViewController: HomeFactory.makeHomeViewModel())
-        //let homeViewController = MovieDetailViewController(movieId: 435)
+        let homeViewController = UINavigationController(rootViewController: MovieDetailViewController(movieId: 435))
         let wishlistViewController = WishlistViewController()
         let settingsViewController = ViewController()
         
