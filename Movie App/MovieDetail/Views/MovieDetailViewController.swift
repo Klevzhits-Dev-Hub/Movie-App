@@ -268,7 +268,11 @@ final class MovieDetailViewController: UIViewController {
     
     @objc private func cancelButtonTapped() {
         print("cancelButtonTapped")
-        dismiss(animated: true)
+        if let navigationController = navigationController {
+            navigationController.popViewController(animated: true)
+        } else {
+            dismiss(animated: true)
+        }
     }
     
     private func showNoTrailerAlert() {
