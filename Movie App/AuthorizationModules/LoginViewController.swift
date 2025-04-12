@@ -129,6 +129,8 @@ final class LoginViewController: UIViewController {
     // MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        navigationItem.titleView = titleLabel
         setupUI()
         view.backgroundColor = .white
         loadRememberMeState()
@@ -174,6 +176,10 @@ final class LoginViewController: UIViewController {
             // Перенаправление на домашний экран
             self.openVC()
         }
+        
+        if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate {
+            sceneDelegate.checkAuthentication()
+        }
     }
     
     @objc func googleButtonTapped() {
@@ -202,9 +208,7 @@ final class LoginViewController: UIViewController {
         }
     }
     private func openVC() {
-        //        let vc = HomeViewController()
-        //        self.navigationController?.pushViewController(vc, animated: true)
-        let vc = ProfileFactory.makeProfileModule()
+        let vc = HomeFactory.makeHomeViewModel()
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
