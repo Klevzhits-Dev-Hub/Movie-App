@@ -10,6 +10,7 @@ import UIKit
 protocol MovieDetailViewProtocol: AnyObject {
     func displayMovieDetails(_ movie: Movie)
     func reloadActorsCollection()
+    func updateLikeButton()
 }
 
 final class MovieDetailViewController: UIViewController {
@@ -201,6 +202,7 @@ final class MovieDetailViewController: UIViewController {
         setupViews()
         setupConstraints()
         configureDescription()
+        configureNavigationBar()
     }
     
     override func viewDidLayoutSubviews() {
@@ -260,6 +262,15 @@ final class MovieDetailViewController: UIViewController {
         present(webVC, animated: true)
     }
     
+    @objc private func addToFavoriteButtonTapped() {
+        presenter.toggleLike()
+    }
+    
+    @objc private func cancelButtonTapped() {
+        print("cancelButtonTapped")
+        dismiss(animated: true)
+    }
+    
     private func showNoTrailerAlert() {
         let alert = UIAlertController(
             title: "No Trailer Available",
@@ -268,6 +279,39 @@ final class MovieDetailViewController: UIViewController {
         )
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
+    }
+    
+    private func configureNavigationBar() {
+        navigationItem.title = "Movie Detail"
+        
+        let cancelButton = UIButton(type: .system)
+        cancelButton.setImage(UIImage(named: "cancelButton"), for: .normal)
+        cancelButton.tintColor = .label
+        cancelButton.backgroundColor = .systemGray5
+        cancelButton.layer.cornerRadius = 24
+        cancelButton.layer.masksToBounds = true
+        
+        cancelButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            cancelButton.widthAnchor.constraint(equalToConstant: 48),
+            cancelButton.heightAnchor.constraint(equalToConstant: 48)
+        ])
+        cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: cancelButton)
+        
+        let heartButton = UIButton(type: .custom)
+        let initialImageName = presenter.isMovieLiked() ? "likeButton" : "favoriteButtonDetail"
+        heartButton.setImage(UIImage(named: initialImageName), for: .normal)
+        heartButton.contentMode = .scaleAspectFit
+        heartButton.imageView?.contentMode = .scaleAspectFit
+        
+        heartButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            heartButton.widthAnchor.constraint(equalToConstant: 24),
+            heartButton.heightAnchor.constraint(equalToConstant: 24)
+        ])
+        heartButton.addTarget(self, action: #selector(addToFavoriteButtonTapped), for: .touchUpInside)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: heartButton)
     }
 }
 
@@ -302,6 +346,14 @@ extension MovieDetailViewController: MovieDetailViewProtocol {
         }
     }
     
+    func updateLikeButton() {
+        let isLiked = presenter.isMovieLiked()
+        let imageName = isLiked ? "likeButton" : "favoriteButtonDetail"
+        
+        if let heartButton = navigationItem.rightBarButtonItem?.customView as? UIButton {
+            heartButton.setImage(UIImage(named: imageName), for: .normal)
+        }
+    }
     
     func reloadActorsCollection() {
         actorCollectionView.reloadData()
@@ -388,7 +440,7 @@ private extension MovieDetailViewController {
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
-            movieImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 40),
+            movieImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 32),
             movieImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             movieImageView.heightAnchor.constraint(equalToConstant: 300),
             movieImageView.widthAnchor.constraint(equalToConstant: 224),
