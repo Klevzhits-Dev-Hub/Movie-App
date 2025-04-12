@@ -294,6 +294,7 @@ final class MovieDetailViewController: UIViewController {
     
     private func configureNavigationBar() {
         navigationItem.title = "Movie Detail"
+        navigationItem.largeTitleDisplayMode = .never
         
         let cancelButton = UIButton(type: .system)
         cancelButton.setImage(UIImage(named: "cancelButton"), for: .normal)

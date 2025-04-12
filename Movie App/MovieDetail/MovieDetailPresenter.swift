@@ -97,7 +97,7 @@ final class MovieDetailPresenter: MovieDetailPresenterProtocol {
     }
     
     func markMovieAsWatched() {
-        guard let movie else { return }
+        guard let movie = movie else { return }
         CoreDataManager.shared.markAsWatched(movie: movie)
     }
 }
