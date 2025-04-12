@@ -20,7 +20,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let searchViewController = SearchViewController()
         let recentWatchViewController = RecentWatchFactory.makeRecentWatchViewModel()
-        let homeViewController = UINavigationController(rootViewController: MovieDetailViewController(movieId: 435))
+        let homeViewController = UINavigationController(rootViewController: HomeFactory.makeHomeViewModel())
         let wishlistViewController = WishlistViewController()
         let settingsViewController = ViewController()
         

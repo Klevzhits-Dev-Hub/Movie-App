@@ -73,6 +73,14 @@ final class CoreDataManager {
         saveContext()
     }
     
+    func containsMovie(withId id: Int) -> Bool {
+        let request = MovieEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %d", Int32(id))
+        request.fetchLimit = 1
+        let count = (try? context.count(for: request)) ?? 0
+        return count > 0
+    }
+    
     // MARK: - Fetch Methods
     func getWatchedMovies() -> [MovieEntity] {
         let request = MovieEntity.fetchRequest()
