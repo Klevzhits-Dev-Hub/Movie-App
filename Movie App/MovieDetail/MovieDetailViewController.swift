@@ -312,10 +312,8 @@ final class MovieDetailViewController: UIViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: cancelButton)
         
         let heartButton = UIButton(type: .custom)
-        let initialImageName = presenter.isMovieLiked() ? "likeButton" : "favoriteButtonDetail"
-        heartButton.setImage(UIImage(named: initialImageName), for: .normal)
-        heartButton.contentMode = .scaleAspectFit
-        heartButton.imageView?.contentMode = .scaleAspectFit
+            heartButton.setImage(UIImage(named: "favoriteButtonDetail"), for: .normal)
+            heartButton.addTarget(self, action: #selector(addToFavoriteButtonTapped), for: .touchUpInside)
         
         heartButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -324,6 +322,8 @@ final class MovieDetailViewController: UIViewController {
         ])
         heartButton.addTarget(self, action: #selector(addToFavoriteButtonTapped), for: .touchUpInside)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: heartButton)
+        
+        updateLikeButton()
     }
 }
 
@@ -356,14 +356,18 @@ extension MovieDetailViewController: MovieDetailViewProtocol {
                 }
             }
         }
+        
+        presenter.checkLikeStatus()
     }
     
     func updateLikeButton() {
         let isLiked = presenter.isMovieLiked()
         let imageName = isLiked ? "likeButton" : "favoriteButtonDetail"
         
-        if let heartButton = navigationItem.rightBarButtonItem?.customView as? UIButton {
-            heartButton.setImage(UIImage(named: imageName), for: .normal)
+        DispatchQueue.main.async { [weak self] in
+            if let heartButton = self?.navigationItem.rightBarButtonItem?.customView as? UIButton {
+                heartButton.setImage(UIImage(named: imageName), for: .normal)
+            }
         }
     }
     
