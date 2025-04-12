@@ -83,6 +83,8 @@ final class SignUpViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
+        navigationItem.titleView = titleLabel
+        
         setupUI()
         setupConstraints()
     }
@@ -135,8 +137,9 @@ final class SignUpViewController: UIViewController {
             }
             
             if wasRegistered {
-                AlertManager.showBasicAlert(on: self, title: "Registration Successful", message: "You can now log in.")
-                self.navigationController?.popViewController(animated: true)
+                if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate {
+                    sceneDelegate.checkAuthentication()
+                }
             } else {
                 AlertManager.showRegistrationErrorAlert(on: self)
             }
