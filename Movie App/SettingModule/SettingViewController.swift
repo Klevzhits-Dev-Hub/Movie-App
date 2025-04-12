@@ -321,10 +321,6 @@ private extension SettingViewController {
             darkModeButton.topAnchor.constraint(equalTo: forgotPasswordButton.bottomAnchor, constant: 32),
             darkModeButton.heightAnchor.constraint(equalToConstant: 24),
             
-//            darkModeLabel.leadingAnchor.constraint(equalTo: darkModeButton.trailingAnchor, constant: 12),
-//            darkModeLabel.centerYAnchor.constraint(equalTo: darkModeButton.centerYAnchor),
-//            darkModeLabel.heightAnchor.constraint(equalToConstant: 24),
-            
             customSwitch.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -30),
             customSwitch.centerYAnchor.constraint(equalTo: darkModeButton.centerYAnchor),
             customSwitch.widthAnchor.constraint(equalToConstant: 44),
