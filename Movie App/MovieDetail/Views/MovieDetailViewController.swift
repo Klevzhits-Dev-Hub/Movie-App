@@ -258,8 +258,15 @@ final class MovieDetailViewController: UIViewController {
             showNoTrailerAlert()
             return
         }
-        let webVC = WebViewController(url: url)
-        present(webVC, animated: true)
+        
+        let webVC = WebViewController(url: url) { [weak self] in
+            print("Добавляем фильм в просмотренные") 
+            self?.presenter.markMovieAsWatched()
+        }
+        
+        let navController = UINavigationController(rootViewController: webVC)
+        navController.presentationController?.delegate = webVC
+        present(navController, animated: true)
     }
     
     @objc private func addToFavoriteButtonTapped() {

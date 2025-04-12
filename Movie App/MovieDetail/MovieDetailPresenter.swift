@@ -17,6 +17,7 @@ protocol MovieDetailPresenterProtocol: AnyObject {
 
     func toggleLike()
     func isMovieLiked() -> Bool
+    func markMovieAsWatched()
 }
 
 final class MovieDetailPresenter: MovieDetailPresenterProtocol {
@@ -93,5 +94,10 @@ final class MovieDetailPresenter: MovieDetailPresenterProtocol {
     func isMovieLiked() -> Bool {
         guard let movie = movie else { return false }
         return CoreDataManager.shared.getLikedMovies().contains { $0.id == Int32(movie.id) }
+    }
+    
+    func markMovieAsWatched() {
+        guard let movie else { return }
+        CoreDataManager.shared.markAsWatched(movie: movie)
     }
 }
