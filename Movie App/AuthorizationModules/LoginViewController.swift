@@ -173,12 +173,11 @@ final class LoginViewController: UIViewController {
                 AlertManager.showSignInErrorAlert(on: self, with: error)
                 return
             }
-            // Перенаправление на домашний экран
-            self.openVC()
-        }
-        
-        if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate {
-            sceneDelegate.checkAuthentication()
+            
+            // Используем SceneDelegate для настройки основного интерфейса с TabBar
+            if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate {
+                sceneDelegate.checkAuthentication()
+            }
         }
     }
     
@@ -203,13 +202,11 @@ final class LoginViewController: UIViewController {
         
         Auth.auth().signIn(with: credential) { result, error in
             guard let _ = result, error == nil else {return}
-            // Перенаправление на домашний экран
-            self.openVC()
+            
+            if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate {
+                sceneDelegate.checkAuthentication()
+            }
         }
-    }
-    private func openVC() {
-        let vc = HomeFactory.makeHomeViewModel()
-        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     @objc func forgotButtonTapped() {

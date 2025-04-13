@@ -77,7 +77,9 @@ class RecentWatchViewController: UIViewController {
     init(presenter: RecentWatchPresenterProtocol) {
         self.presenter = presenter
         super.init(nibName: nil, bundle: nil)
-      (presenter as? RecentWatchPresenter)?.setupView(self)
+        if let recentWatchPresenter = presenter as? RecentWatchPresenter {
+            recentWatchPresenter.setupView(self)
+        }
     }
     
     required init?(coder: NSCoder) {

@@ -6,68 +6,34 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
         
-        let tabBarController = UITabBarController()
-        
-      let searchViewController = UINavigationController(rootViewController: SearchFactory.makeSearchViewModel())
-      let recentWatchViewController = UINavigationController(rootViewController: RecentWatchFactory.makeRecentWatchViewModel())
-        let homeViewController = UINavigationController(rootViewController: HomeFactory.makeHomeViewModel())
-      let wishlistViewController = UINavigationController(rootViewController: WishlistViewController())
-        let settingsViewController = ViewController()
-        
-        tabBarController.viewControllers = [
-            searchViewController,
-            recentWatchViewController,
-            homeViewController,
-            wishlistViewController,
-            settingsViewController
-        ]
-        
-        tabBarController.selectedViewController = homeViewController
-        
-        searchViewController.tabBarItem = UITabBarItem(
-            title: "",
-            image: .init(systemName: "magnifyingglass"),
-            tag: 0)
-        
-        recentWatchViewController.tabBarItem = UITabBarItem(
-            title: "",
-            image: .init(systemName: "play.circle"),
-            tag: 1)
-        
-        homeViewController.tabBarItem = UITabBarItem(
-            title: "",
-            image: .init(systemName: "house.circle.fill"),
-            tag: 2)
-        
-        wishlistViewController.tabBarItem = UITabBarItem(
-            title: "",
-            image: .init(systemName: "heart"),
-            tag: 3)
-        
-        settingsViewController.tabBarItem = UITabBarItem(
-            title: "",
-            image: .init(systemName: "person"),
-            tag: 4)
-        
-        tabBarController.tabBar.isTranslucent = false
-        
-        tabBarController.tabBar.tintColor = .purple
-        
-        tabBarController.tabBar.unselectedItemTintColor = .gray
-        
+        checkAuthentication()
+    }
+    
+    func checkAuthentication() {
+        if Auth.auth().currentUser != nil {
+            setupMainInterface()
+        } else {
+            let loginVC = LoginViewController()
+            let navigationController = UINavigationController(rootViewController: loginVC)
+            window?.rootViewController = navigationController
+            window?.makeKeyAndVisible()
+        }
+    }
+    
+    private func setupMainInterface() {
+        let tabBarController = TabBarFactory.makeTabBarController()
         window?.rootViewController = tabBarController
         window?.makeKeyAndVisible()
     }
-
 }
 
