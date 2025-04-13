@@ -68,7 +68,6 @@ final class RecentWatchPresenter: RecentWatchPresenterProtocol {
     if category == "All" {
       filteredMovies = movies
     } else {
-      print(955)
       filteredMovies = movies.filter { movie in
         if let genres = movie.movie.genres {
           return genres.contains(where: { $0.name.lowercased() == category.lowercased() })
