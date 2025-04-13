@@ -22,7 +22,7 @@ extension UITextField {
         return textField
     }
     
-    static  func makeTextFieldWithCalendar(withPlaceholder text: String) -> UITextField {
+    static  func makeTextFieldWithCalendar(withPlaceholder text: String, actionDate: Selector, action: Selector) -> UITextField {
         let textField = makeTextField(withPlaceholder: text)
         
         let calendarButton = UIButton(type: .system)
@@ -36,16 +36,18 @@ extension UITextField {
         
         let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
-        datePicker.preferredDatePickerStyle = .wheels
+        if #available(iOS 13.4, *) {
+            datePicker.preferredDatePickerStyle = .wheels
+        }
+        datePicker.addTarget(self, action: actionDate, for: .valueChanged)
+        textField.inputView = datePicker
         
-        //            datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
-        //            textField.inputView = datePicker
-        //
-        //            let toolBar = UIToolbar().toolBarPicker(#selector(doneButtonPressed))
-        //            textField.inputAccessoryView = toolBar
+        let toolBar = UIToolbar().toolBarPicker(action)
+        textField.inputAccessoryView = toolBar
         
         return textField
     }
+    
     
     static  func makeAuthTextField(withPlaceholder text: String) -> UITextField {
         let textField = UITextField()
@@ -100,5 +102,20 @@ extension UITextField {
         textField.isSecureTextEntry.toggle()
         let buttonImage = textField.isSecureTextEntry ? UIImage(systemName: "eye.slash") : UIImage(systemName: "eye")
         sender.setImage(buttonImage, for: .normal)
+    }
+}
+
+private extension UIToolbar {
+    func toolBarPicker(_ select: Selector) -> UIToolbar {
+        let toolBar = UIToolbar()
+        toolBar.barStyle = .default
+        toolBar.barTintColor = #colorLiteral(red: 0.3176470588, green: 0.3058823529, blue: 0.7137254902, alpha: 1)
+        toolBar.tintColor = .white
+        toolBar.sizeToFit()
+        
+        let doneButton = UIBarButtonItem(title: "Done", style: .done, target: self, action: select)
+        toolBar.setItems([doneButton], animated: false)
+        
+        return toolBar
     }
 }
