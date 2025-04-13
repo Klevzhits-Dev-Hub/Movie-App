@@ -55,15 +55,11 @@ final class CoreDataManager {
     
     func toggleLike(movie: Movie) {
         if let existingMovie = fetchMovie(by: movie.id) {
-            if existingMovie.isWatched {
-                existingMovie.isLiked.toggle()
-            } else {
                 if existingMovie.isLiked {
                     context.delete(existingMovie)
                 } else {
                     existingMovie.isLiked = true
                 }
-            }
         } else {
             let newMovie = MovieEntity(context: context)
             configureMovieEntity(newMovie, with: movie)
