@@ -8,6 +8,9 @@
 import UIKit
 
 protocol ProfileViewProtocol: AnyObject {
+    func backButtonTapped()
+    func saveTapped()
+    func updateGenderSelection(type: GenderCustomButton.ButtonType)
 }
 
 final class ProfileViewController: UIViewController {
@@ -15,11 +18,11 @@ final class ProfileViewController: UIViewController {
     private let presenter: ProfilePresenterProtocol
     
     private lazy var dateFormatter: DateFormatter = {
-          let formatter = DateFormatter()
-          formatter.dateStyle = .medium
-          formatter.timeStyle = .none
-          return formatter
-      }()
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter
+    }()
     
     private lazy var titleLabel: UILabel = {
         let element = UILabel()
@@ -88,7 +91,7 @@ final class ProfileViewController: UIViewController {
     private lazy var firstNameTextField = UITextField.makeTextField(withPlaceholder: "Andy")
     private lazy var lastNameTextField = UITextField.makeTextField(withPlaceholder: "Lexsian")
     private lazy var emailTextField = UITextField.makeTextField(withPlaceholder: "Andylexian22@gmail.com")
-    private lazy var dateOfBirthTextField = UITextField.makeTextFieldWithCalendar(withPlaceholder: "24 february 1996", actionDate: #selector(datePickerValueChanged), action: #selector(doneButtonPressed) )
+    private lazy var dateOfBirthTextField = UITextField.makeTextFieldWithCalendar(withPlaceholder: "24 february 1996", actionDate: #selector(datePickerValueChanged(_:)), action: #selector(doneButtonPressed), target: self)
     private lazy var locationTextView: UITextView = {
         let textView = UITextView()
         textView.backgroundColor = .clear
@@ -107,9 +110,11 @@ final class ProfileViewController: UIViewController {
     //MARK: - Buttons
     private lazy var maleButton = GenderCustomButton(type: .male) {
         print("maleButtonTapped")
+        self.presenter.genderButtonTapped(type: .male)
     }
     private lazy var femaleButton = GenderCustomButton(type: .female) {
         print("femaleButtonTapped")
+        self.presenter.genderButtonTapped(type: .female)
     }
     private lazy var saveButton: UIButton = {
         let button = UIButton(type: .system)
@@ -150,7 +155,7 @@ final class ProfileViewController: UIViewController {
         let imagePickerController = UIImagePickerController()
         imagePickerController.sourceType = sourceType
         imagePickerController.delegate = self
-        imagePickerController.allowsEditing = true 
+        imagePickerController.allowsEditing = true
         present(imagePickerController, animated: true, completion: nil)
     }
     @objc private func saveButtonPressed() {
@@ -161,15 +166,16 @@ final class ProfileViewController: UIViewController {
         presenter.backButtonPressed()
     }
     @objc func datePickerValueChanged(_ sender: UIDatePicker) {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "dd.MM.yyyy"
-            
-            dateOfBirthTextField.text = dateFormatter.string(from:  sender.date)
-        }
-        
-        @objc func doneButtonPressed() {
-            dateOfBirthTextField.resignFirstResponder()
-        }
+        dateOfBirthTextField.text = dateFormatter.string(from: sender.date)
+    }
+    
+    @objc func doneButtonPressed() {
+        dateOfBirthTextField.resignFirstResponder()
+    }
+    
+    @objc func showDatePicker(_ sender: UIButton) {
+        dateOfBirthTextField.becomeFirstResponder()
+    }
 }
 
 private extension ProfileViewController {
@@ -274,6 +280,18 @@ private extension ProfileViewController {
             saveButton.heightAnchor.constraint(equalToConstant: 56),
         ])
     }
+    func updateGenderUI() {
+        if let selectedGender = presenter.getSelectedGender() {
+            switch selectedGender {
+            case .male:
+                maleButton.isSelected = true
+                femaleButton.isSelected = false
+            case .female:
+                femaleButton.isSelected = true
+                maleButton.isSelected = false
+            }
+        }
+    }
 }
 // MARK: - UIImagePickerControllerDelegate Methods
 extension ProfileViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
@@ -308,8 +326,16 @@ extension ProfileViewController: UIImagePickerControllerDelegate, UINavigationCo
 
 // MARK: - ProfileViewProtocol
 extension ProfileViewController: ProfileViewProtocol {
+    func updateGenderSelection(type: GenderCustomButton.ButtonType) {
+        updateGenderUI()
+    }
+    
+    func saveTapped() {
+        print("save button tapped!")
+    }
+    
     func backButtonTapped() {
-        
+        navigationController?.popViewController(animated: true)
     }
 }
 

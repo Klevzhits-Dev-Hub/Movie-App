@@ -175,6 +175,12 @@ final class SettingViewController: UIViewController {
         setupView()
         setupConstraints()
         loadDarkModeState()
+        updateProfileData()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        updateProfileData()
     }
     
     init(presenter: SettingPresenterProtocol) {
@@ -187,6 +193,14 @@ final class SettingViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func updateProfileData() {
+        AuthService.shared.fetchUserName { [weak self] username in
+            guard let self = self else {return}
+            DispatchQueue.main.async {
+                self.profileNameLabel.text = username ?? "Алёша"
+            }
+        }
+    }
     private func loadDarkModeState() {
         if #available(iOS 13.0, *) {
             let currentInterfaceStyle = traitCollection.userInterfaceStyle

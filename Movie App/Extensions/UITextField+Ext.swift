@@ -22,14 +22,14 @@ extension UITextField {
         return textField
     }
     
-    static  func makeTextFieldWithCalendar(withPlaceholder text: String, actionDate: Selector, action: Selector) -> UITextField {
+    static  func makeTextFieldWithCalendar(withPlaceholder text: String, actionDate: Selector, action: Selector, target: Any) -> UITextField {
         let textField = makeTextField(withPlaceholder: text)
         
         let calendarButton = UIButton(type: .system)
-        calendarButton.setImage(#imageLiteral(resourceName: "сalendar"), for: .normal)
+        calendarButton.setImage(#imageLiteral(resourceName: "calendar"), for: .normal)
         calendarButton.tintColor = #colorLiteral(red: 0.3179999888, green: 0.3059999943, blue: 0.7139999866, alpha: 1)
         calendarButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: -30, bottom: 0, right: 0)
-        calendarButton.translatesAutoresizingMaskIntoConstraints = true
+        calendarButton.translatesAutoresizingMaskIntoConstraints = false
         textField.rightView = calendarButton
         textField.rightViewMode = .always
         textField.translatesAutoresizingMaskIntoConstraints = false
@@ -39,11 +39,12 @@ extension UITextField {
         if #available(iOS 13.4, *) {
             datePicker.preferredDatePickerStyle = .wheels
         }
-        datePicker.addTarget(self, action: actionDate, for: .valueChanged)
         textField.inputView = datePicker
         
-        let toolBar = UIToolbar().toolBarPicker(action)
+        let toolBar = UIToolbar().toolbarPicker(action)
         textField.inputAccessoryView = toolBar
+        
+        calendarButton.addTarget(target, action: #selector(ProfileViewController.showDatePicker(_:)), for: .touchUpInside)
         
         return textField
     }
@@ -57,7 +58,7 @@ extension UITextField {
         textField.textColor = .grayText
         
         textField.heightAnchor.constraint(equalToConstant: 52).isActive = true
-//        textField.widthAnchor.constraint(equalToConstant: 327).isActive = true
+        //        textField.widthAnchor.constraint(equalToConstant: 327).isActive = true
         
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
@@ -70,7 +71,7 @@ extension UITextField {
         textField.textColor = .grayText
         
         textField.heightAnchor.constraint(equalToConstant: 52).isActive = true
-//        textField.widthAnchor.constraint(equalToConstant: 327).isActive = true
+        //        textField.widthAnchor.constraint(equalToConstant: 327).isActive = true
         
         textField.isUserInteractionEnabled = true
         textField.isSecureTextEntry = true
@@ -88,7 +89,7 @@ extension UITextField {
         iconContainerView.addSubview(showPasswordButton)
         iconContainerView.bringSubviewToFront(showPasswordButton)
         showPasswordButton.addTarget(textField, action: #selector(UITextField.togglePasswordVisibility(_:)), for: .touchUpInside)
-
+        
         textField.rightView = iconContainerView
         textField.rightViewMode = .always
         
@@ -106,16 +107,15 @@ extension UITextField {
 }
 
 private extension UIToolbar {
-    func toolBarPicker(_ select: Selector) -> UIToolbar {
-        let toolBar = UIToolbar()
-        toolBar.barStyle = .default
-        toolBar.barTintColor = #colorLiteral(red: 0.3176470588, green: 0.3058823529, blue: 0.7137254902, alpha: 1)
-        toolBar.tintColor = .white
-        toolBar.sizeToFit()
+    func toolbarPicker(_ target: Selector) -> UIToolbar {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
         
-        let doneButton = UIBarButtonItem(title: "Done", style: .done, target: self, action: select)
-        toolBar.setItems([doneButton], animated: false)
+        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: target)
+        let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         
-        return toolBar
+        toolbar.setItems([flexibleSpace, doneButton], animated: false)
+        return toolbar
     }
 }
+
