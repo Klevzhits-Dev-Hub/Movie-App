@@ -8,8 +8,8 @@
 import UIKit
 
 final class SettingFactory {
- static func makeSettingViewModel() -> UIViewController {
-        let presenter = SettingPresenter()
+    static func makeSettingViewModel(navigationController: UINavigationController?) -> UIViewController {
+        let presenter = SettingPresenter(navigationController: navigationController)
         let viewController = SettingViewController(presenter: presenter)
         presenter.setupView(viewController)
         return viewController

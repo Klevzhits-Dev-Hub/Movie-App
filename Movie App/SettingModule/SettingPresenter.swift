@@ -10,17 +10,22 @@ import UIKit
 
 protocol SettingPresenterProtocol {
     func nextButtonTapped()
-    func changePasswordButtonTapped()
-    func forgotPasswordButtonTapped()
-    func darkModeButtonTapped()
+    func changePasswordTapped()
+    func forgotPasswordTapped()
+    func darkModeButtonTapped(isOn: Bool)
+    func logOutButtonTaped()
 }
 
 final class SettingPresenter{
     // MARK: - Properties
     private weak var view: SettingViewProtocol?
-    
+    private weak var navigationController: UINavigationController?
+        
+      
     // MARK: - Initialization
-    init() {}
+    init(navigationController: UINavigationController?) {
+        self.navigationController = navigationController
+    }
     
     func setupView(_ view: SettingViewProtocol) {
         self.view = view
@@ -33,17 +38,19 @@ extension SettingPresenter: SettingPresenterProtocol {
         view?.navigateToProfile()
     }
     
-    func changePasswordButtonTapped() {
-        
+    func changePasswordTapped() {
+        view?.navigateToRessetVC()
     }
     
-    func forgotPasswordButtonTapped() {
-        
+    func forgotPasswordTapped() {
+        view?.navigateToRessetVC()
     }
     
-    func darkModeButtonTapped() {
-        
+    func darkModeButtonTapped(isOn: Bool) {
+        view?.darkModeTapped(isOn: isOn)
     }
     
-    
+    func logOutButtonTaped() {
+        view?.logOut()
+    }
 }

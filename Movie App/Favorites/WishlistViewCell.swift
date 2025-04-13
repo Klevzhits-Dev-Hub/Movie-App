@@ -13,7 +13,6 @@ class WishlistViewCell: UICollectionViewCell {
         let imageView = UIImageView()
         
         imageView.contentMode = .scaleToFill
-        imageView.image = UIImage(named: "filmImage")
         imageView.layer.cornerRadius = 16
         imageView.clipsToBounds = true
         
@@ -25,7 +24,8 @@ class WishlistViewCell: UICollectionViewCell {
         
         label.text = "Luck"
         label.font = UIFont(name: Fonts.PlusJakartaSans.extraBold.rawValue, size: 18)
-        label.numberOfLines = 2
+        label.numberOfLines = 0
+        label.lineBreakMode = .byWordWrapping
         
         return label
     }()
@@ -73,7 +73,7 @@ class WishlistViewCell: UICollectionViewCell {
     }()
     
     lazy var timeElements = makeStackView(image: UIImage(named: "timeImage"), view: timeLabel)
-    lazy var dataElements = makeStackView(image: UIImage(named: "dataImage"), view: dataLabel )
+    lazy var dataElements = makeStackView(image: UIImage(named: "dataImage"), view: dataLabel)
     lazy var filmElements = makeStackView(image: UIImage(named: "filmIconImage"), view: actionButton)
     
     private lazy var filmIconImageView: UIImageView = {
@@ -91,6 +91,9 @@ class WishlistViewCell: UICollectionViewCell {
         
         return button
     }()
+  
+  // MARK: - Properties
+  private var movie: Movie?
     
     // MARK: - Initialization
     override init(frame: CGRect) {
@@ -102,16 +105,48 @@ class WishlistViewCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    // MARK: - Private Methods
-    @objc private func likeButtonTapped() {
-        let isLiked = likeButton.currentImage == UIImage(named: "likeButton")
-        likeButton.setImage(UIImage(named: isLiked ? "emptyLikeButton" : "likeButton"), for: .normal)
+    //MARK: - Methods
+  func configure(for model: WishlistMovie) {
+    movie = model.movie
+    titleLabel.text = model.movie.name
+    timeLabel.text = model.movie.durationString
+    if let date = model.releaseDate {
+      dataLabel.text = formatDate(date.ISO8601Format())
+    }
+    if let firstGenre = model.movie.genres?.first {
+      actionButton.setTitle(firstGenre.name, for: .normal)
     }
     
-    func makeStackView(image: UIImage?, view: UIView) -> UIStackView {
+    setLikeButtonColor(with: model.movie)
+    
+    if let posterUrl = model.movie.poster?.url ?? model.movie.poster?.previewUrl {
+        ImageLoader.shared.loadImage(from: posterUrl) { [weak self] image in
+            DispatchQueue.main.async {
+                self?.filmImageView.image = image
+            }
+        }
+    }
+  }
+  
+    // MARK: - Private Methods
+    @objc private func likeButtonTapped() {
+      if let movie {
+        CoreDataManager.shared.toggleLike(movie: movie)
+        setLikeButtonColor(with: movie)
+      }
+    }
+  
+  private func setLikeButtonColor(with movie: Movie) {
+      if CoreDataManager.shared.containsMovie(withId: movie.id) {
+        likeButton.setImage(UIImage(systemName: "heart.fill"), for: .normal)
+        likeButton.tintColor = UIColor(named: "AccentColor")
+      } else {
+        likeButton.setImage(UIImage(systemName: "suit.heart"), for: .normal)
+      }
+  }
+    
+    private func makeStackView(image: UIImage?, view: UIView) -> UIStackView {
         let imageView = UIImageView()
-        
         imageView.image = image
         
         let view = UIStackView(arrangedSubviews: [imageView, view])
@@ -121,6 +156,20 @@ class WishlistViewCell: UICollectionViewCell {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }
+  
+  private func formatDate(_ dateString: String) -> String {
+    let inputFormatter = ISO8601DateFormatter()
+    inputFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    
+    let outputFormatter = DateFormatter()
+    outputFormatter.dateFormat = "dd MMM yyyy"
+    outputFormatter.locale = Locale(identifier: "en_US_POSIX")
+    
+    if let date = inputFormatter.date(from: dateString) {
+        return outputFormatter.string(from: date)
+    }
+    return dateString
+}
     
     private func setupUI() {
         addSubview(filmImageView)
@@ -151,6 +200,7 @@ class WishlistViewCell: UICollectionViewCell {
             filmImageView.trailingAnchor.constraint(equalTo: stackView.leadingAnchor, constant: -14),
             
             titleLabel.topAnchor.constraint(equalTo: topAnchor),
+            titleLabel.trailingAnchor.constraint(equalTo: likeButton.leadingAnchor, constant: 5),
             
             likeButton.topAnchor.constraint(equalTo: topAnchor),
             likeButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -22),

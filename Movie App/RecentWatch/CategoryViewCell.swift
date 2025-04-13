@@ -9,26 +9,35 @@ import UIKit
 
 class CategoryViewCell: UICollectionViewCell {
     // MARK: - GUI Variables
-    private lazy var categoryButton: UIButton = {
-        let button = UIButton()
-        
-        button.setTitle("All", for: .normal)
-        button.setTitleColor(.gray, for: .normal)
-        button.backgroundColor = .background
-        button.layer.cornerRadius = 18
-        button.layer.borderWidth = 1
-        button.layer.borderColor = UIColor.gray.cgColor
-        button.titleLabel?.font = UIFont(name: Fonts.PlusJakartaSans.regular.rawValue, size: 12)
-        
-        return button
-    }()
-    
+  private lazy var categoryLabel: UILabel = {
+      let label = UILabel()
+      
+      label.text = "All"
+      label.textColor = .grayText
+      label.backgroundColor = .background
+      label.layer.cornerRadius = 18
+      label.layer.borderWidth = 1
+      label.layer.borderColor = UIColor.grayText.cgColor
+      label.font = UIFont(name: Fonts.PlusJakartaSans.regular.rawValue, size: 12)
+      label.textAlignment = .center
+      label.clipsToBounds = true
+      
+      return label
+  }()
+
+    //MARK: - Properties
+  
+  override var isSelected: Bool {
+      didSet {        
+        categoryLabel.backgroundColor = isSelected ? .selected : .white
+        categoryLabel.textColor = isSelected ? .white : .grayText
+        categoryLabel.layer.borderColor = isSelected ? UIColor.selected.cgColor : UIColor.grayText.cgColor
+      }
+  }
+  
     // MARK: - Initialization
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
-        categoryButton.addTarget(self, action: #selector(categoryButtonTapped), for: .touchUpInside)
-        
         setupUI()
     }
     
@@ -36,34 +45,27 @@ class CategoryViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    
     //MARK: - Methods
     func configure(for text: String) {
-        categoryButton.setTitle(text, for: .normal)
+      categoryLabel.text = text
     }
     
     //MARK: - Private Methods
-    @objc private func categoryButtonTapped() {
-        let isSelected = categoryButton.backgroundColor == .background
-        categoryButton.backgroundColor = isSelected ? .selected : .background
-        categoryButton.setTitleColor(isSelected ? .background : .grayText, for: .normal)
-    }
-    
     private func setupUI() {
-        contentView.addSubview(categoryButton)
+        contentView.addSubview(categoryLabel)
         
         setupConstraints()
     }
     
     private func setupConstraints() {
-        categoryButton.translatesAutoresizingMaskIntoConstraints = false
+      categoryLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            categoryButton.topAnchor.constraint(equalTo: topAnchor),
-            categoryButton.leadingAnchor.constraint(equalTo: leadingAnchor),
-            categoryButton.trailingAnchor.constraint(equalTo: trailingAnchor),
-            categoryButton.bottomAnchor.constraint(equalTo: bottomAnchor),
-            categoryButton.heightAnchor.constraint(equalToConstant: 34)
+          categoryLabel.topAnchor.constraint(equalTo: topAnchor),
+          categoryLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
+          categoryLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
+          categoryLabel.bottomAnchor.constraint(equalTo: bottomAnchor),
+          categoryLabel.heightAnchor.constraint(equalToConstant: 34)
         ])
     }
 }

@@ -7,6 +7,14 @@
 
 import UIKit
 
+protocol SearchViewProtocol: AnyObject {
+  func showCategories(_ categories: [String])
+  func showMovies(_ movies: [Movie])
+  func dismissKeyboardSearch()
+  func showFilterSheet()
+  func navigateToMovieDetail(movieId: Int)
+}
+
 class SearchViewController: UIViewController {
     // MARK: - GUI Variables
     private lazy var titleLabel: UILabel = {
@@ -81,7 +89,6 @@ class SearchViewController: UIViewController {
         collectionView.backgroundColor = .clear
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.dataSource = self
-        collectionView.delegate = self
         collectionView.register(CategoryViewCell.self, forCellWithReuseIdentifier: "CategoryViewCell")
         
         return collectionView
@@ -97,15 +104,16 @@ class SearchViewController: UIViewController {
         collectionView.register(WishlistViewCell.self, forCellWithReuseIdentifier: "WishlistViewCell")
         collectionView.backgroundColor = .clear
         collectionView.dataSource = self
-        collectionView.delegate = self
         
         return collectionView
     }()
     
     
     //MARK: - Properties
-    var categories: [String] = ["All", "Action", "Adventure", "Criminal", "Drama", "Mystery", "Fantasy"]
-    
+  private var categories: [String] = []
+  private var displayedMovies = [Movie]()
+  private let presenter: SearchPresenterProtocol
+  
     //MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -113,17 +121,41 @@ class SearchViewController: UIViewController {
         filterButton.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside)
         
         searchTextField.delegate = self
+        moviesCollectionView.delegate = self
+        categoryCollectionView.delegate = self
         
+        setupNavigationBar()
         keyBoard()
         setupUI()
+        presenter.viewDidLoad()
     }
-    
+  
+  init(presenter: SearchPresenterProtocol) {
+      self.presenter = presenter
+    super.init(nibName: nil, bundle: nil)
+    (presenter as? SearchPresenter)?.setupView(self)
+  }
+  
+  required init?(coder: NSCoder) {
+      fatalError("init(coder:) has not been implemented")
+  }
+  
+  //MARK: - Methods
+  func selectCategoryIfNeeded() {
+    guard let selectedCategoryIndex = presenter.selectedCategoryIndex else { return }
+       categoryCollectionView.selectItem(at: selectedCategoryIndex, animated: true, scrollPosition: .centeredHorizontally)
+   }
+  
     //MARK: - Private Methods
     private func keyBoard() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
     }
+  
+  private func setupNavigationBar() {
+    navigationController?.isNavigationBarHidden = true
+  }
     
     private func setupUI() {
         view.addSubview(titleLabel)
@@ -179,23 +211,18 @@ class SearchViewController: UIViewController {
     //MARK: - Action
     @objc
     func filterButtonTapped() {
-        let filterVC = FilterSheetViewController()
-        present(filterVC, animated: true, completion: nil)
+      presenter.filterButtonTapped()
     }
     
     @objc func dismissKeyboard() {
-        searchTextField.resignFirstResponder()
+      view.endEditing(true)
     }
 }
 
 //MARK: - UICollectionViewDataSource
 extension SearchViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if collectionView == categoryCollectionView {
-            return categories.count
-        } else {
-            return  6
-        }
+      return collectionView == categoryCollectionView ? categories.count : displayedMovies.count
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -209,10 +236,14 @@ extension SearchViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == categoryCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CategoryViewCell", for: indexPath) as! CategoryViewCell
-            cell.configure(for: categories[indexPath.row])
+            let category = categories[indexPath.item]
+            cell.configure(for: category)
+
             return cell
         } else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WishlistViewCell", for: indexPath) as! WishlistViewCell
+          
+            cell.configure(for: WishlistMovie(movie: displayedMovies[indexPath.row], releaseDate: nil, isLike: false))
             
             return cell
         }
@@ -221,7 +252,13 @@ extension SearchViewController: UICollectionViewDataSource {
 
 //MARK: - UICollectionViewDelegate
 extension SearchViewController: UICollectionViewDelegate {
-    
+  func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    if collectionView == categoryCollectionView {
+      presenter.didSelectCategory(at: indexPath)
+    } else {
+      presenter.didSelectMovie(at: indexPath)
+    }
+  }
 }
 
 //MARK: - UICollectionViewDelegateFlowLayout
@@ -251,4 +288,36 @@ extension SearchViewController: UITextFieldDelegate {
         textField.resignFirstResponder()
         return true
     }
+}
+
+//MARK: - WishlistViewProtocol
+extension SearchViewController: SearchViewProtocol {
+  func dismissKeyboardSearch() {
+    searchTextField.resignFirstResponder()
+  }
+  
+  func showFilterSheet() {
+    present(FilterSheetViewController(), animated: true)
+  }
+  
+  func showCategories(_ categories: [String]) {
+    self.categories = categories
+    
+    DispatchQueue.main.async {
+        self.categoryCollectionView.reloadData()
+        self.selectCategoryIfNeeded()
+    }
+  }
+  
+  func showMovies(_ movies: [Movie]) {
+      self.displayedMovies = movies
+    DispatchQueue.main.async {
+            self.moviesCollectionView.reloadData()
+    }
+  }
+  
+  func navigateToMovieDetail(movieId: Int) {
+      let detailVC = MovieDetailViewController(movieId: movieId)
+      navigationController?.pushViewController(detailVC, animated: true)
+  }
 }

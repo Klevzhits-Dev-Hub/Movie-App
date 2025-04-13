@@ -16,12 +16,10 @@ extension UIButton {
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
         
-//        button.widthAnchor.constraint(equalToConstant: 327).isActive = true
         button.heightAnchor.constraint(equalToConstant: 56).isActive = true
         
         button.addTarget(target, action: action, for: .touchUpInside)
         button.addTarget(button, action: #selector(UIButton.buttonTouchedDown(_:)), for: .touchDown)
-        
         
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -34,6 +32,7 @@ extension UIButton {
         button.clipsToBounds = false
         button.layer.borderColor = UIColor.black.cgColor
         button.layer.borderWidth = 0.8
+        button.isUserInteractionEnabled = true
         button.translatesAutoresizingMaskIntoConstraints = false
         
         let containerStackView = UIStackView()
@@ -64,15 +63,13 @@ extension UIButton {
         NSLayoutConstraint.activate([
             containerStackView.centerXAnchor.constraint(equalTo: button.centerXAnchor),
             containerStackView.centerYAnchor.constraint(equalTo: button.centerYAnchor),
-            
-//            button.widthAnchor.constraint(equalToConstant: 327),
+
             button.heightAnchor.constraint(equalToConstant: 56)
         ])
         
         button.addTarget(target, action: action, for: .touchUpInside)
         button.addTarget(button, action: #selector(UIButton.buttonTouchedDown(_:)), for: .touchDown)
-        
-        
+  
         return button
     }
     

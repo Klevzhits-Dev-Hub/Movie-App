@@ -7,6 +7,11 @@
 
 import UIKit
 
+protocol WishlistViewProtocol: AnyObject {
+  func reloadCollectionView()
+  func navigateToMovieDetail(movieId: Int) 
+}
+
 class WishlistViewController: UIViewController {
     // MARK: - GUI Variables
     private lazy var titleLabel: UILabel = {
@@ -35,12 +40,33 @@ class WishlistViewController: UIViewController {
         return collectionView
     }()
     
+  //MARK: - Properties
+  private let presenter: WishlistViewPresenterProtocol
+  
+  //MARK: - Initialization
+  init() {
+      self.presenter = WishlistViewPresenter()
+      super.init(nibName: nil, bundle: nil)
+      self.presenter.view = self
+  }
+  
+  required init?(coder: NSCoder) {
+      fatalError("init(coder:) has not been implemented")
+  }
+  
     //MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        presenter.viewDidLoad()
+      setupNavigationBar()
         setupUI()
     }
+  
+  override func viewWillAppear(_ animated: Bool) {
+      super.viewWillAppear(animated)
+       presenter.viewWillAppear()
+  }
     
     //MARK: - Private methods
     private func setupUI() {
@@ -49,6 +75,10 @@ class WishlistViewController: UIViewController {
         
         setupConstraints()
     }
+  
+  private func setupNavigationBar() {
+    navigationController?.isNavigationBarHidden = true
+  }
     
     private func  setupConstraints() {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -70,19 +100,22 @@ class WishlistViewController: UIViewController {
 //MARK: - UICollectionViewDataSource
 extension WishlistViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 5
+        return presenter.getNumberOfItems()
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WishlistViewCell", for: indexPath) as! WishlistViewCell
-        
+      let movies = presenter.getWishlistMovies(at: indexPath.row)
+        cell.configure(for: movies)
         return cell
     }
 }
 
 //MARK: - UICollectionViewDelegate
 extension WishlistViewController: UICollectionViewDelegate {
-    
+  func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        presenter.didSelectMovie(at: indexPath.row)
+   }
 }
 
 //MARK: -  UICollectionViewDelegateFlowLayout
@@ -93,4 +126,16 @@ extension WishlistViewController: UICollectionViewDelegateFlowLayout {
         let width = (UIScreen.main.bounds.size.width)
         return CGSize(width: width, height: 160)
     }
+}
+
+//MARK: - WishlistViewProtocol
+extension WishlistViewController: WishlistViewProtocol {
+  func reloadCollectionView() {
+    collectionView.reloadData()
+  }
+  
+  func navigateToMovieDetail(movieId: Int) {
+      let detailVC = MovieDetailViewController(movieId: movieId)
+      navigationController?.pushViewController(detailVC, animated: true)
+  }
 }

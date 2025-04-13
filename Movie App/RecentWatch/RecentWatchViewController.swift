@@ -8,7 +8,10 @@
 import UIKit
 
 protocol RecentWatchViewProtocol: AnyObject {
-    
+  func reloadCollectionView()
+  func showCategories(_ categories: [String])
+  func showMovies(_ movies: [Movie])
+  func navigateToMovieDetail(movieId: Int) 
 }
 
 class RecentWatchViewController: UIViewController {
@@ -59,25 +62,39 @@ class RecentWatchViewController: UIViewController {
     
     //MARK: - Properties
     private let presenter: RecentWatchPresenterProtocol
-    
-    var categories: [String] = ["All", "Action", "Adventure", "Criminal", "Drama", "Mystery", "Fantasy"]
+    private var categories: [String] = []
+    private var displayedMovies = [Movie]()
     
     //MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupNavigationBar()
         setupUI()
+        presenter.viewDidLoad()
     }
     
     init(presenter: RecentWatchPresenterProtocol) {
         self.presenter = presenter
         super.init(nibName: nil, bundle: nil)
+      (presenter as? RecentWatchPresenter)?.setupView(self)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+  
+  override func viewWillAppear(_ animated: Bool) {
+      super.viewWillAppear(animated)
+    presenter.viewWillAppear()
+  }
     
+  //MARK: - Methods
+  func selectCategoryIfNeeded() {
+    guard let selectedCategoryIndex = presenter.selectedCategoryIndex else { return }
+       categoryCollectionView.selectItem(at: selectedCategoryIndex, animated: true, scrollPosition: .centeredHorizontally)
+   }
+  
     //MARK: - Private methods
     private func setupUI() {
         view.addSubview(titleLabel)
@@ -86,6 +103,10 @@ class RecentWatchViewController: UIViewController {
         
         setupConstraints()
     }
+  
+  private func setupNavigationBar() {
+    navigationController?.isNavigationBarHidden = true
+  }
     
     private func  setupConstraints() {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -113,11 +134,7 @@ class RecentWatchViewController: UIViewController {
 //MARK: - UICollectionViewDataSource
 extension RecentWatchViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if collectionView == categoryCollectionView {
-            return categories.count
-        } else {
-            return 5
-        }
+      return collectionView == categoryCollectionView ? categories.count : presenter.getNumberOfItems()
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -131,11 +148,13 @@ extension RecentWatchViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == categoryCollectionView  {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CategoryViewCell", for: indexPath) as! CategoryViewCell
-            cell.configure(for: categories[indexPath.row])
+          let category = categories[indexPath.item]
+            cell.configure(for: category)
             return cell
         } else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WishlistViewCell", for: indexPath) as! WishlistViewCell
-            
+            cell.configure(for: presenter.getRecentMovies(at: indexPath.row))
+          
             return cell
         }
     }
@@ -143,7 +162,13 @@ extension RecentWatchViewController: UICollectionViewDataSource {
 
 //MARK: - UICollectionViewDelegate
 extension RecentWatchViewController: UICollectionViewDelegate {
-    
+  func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    if collectionView == categoryCollectionView {
+      presenter.didSelectCategory(at: indexPath)
+    } else {
+      presenter.didSelectMovie(at: indexPath)
+    }
+  }
 }
 
 //MARK: - UICollectionViewDelegateFlowLayout
@@ -169,5 +194,28 @@ extension RecentWatchViewController: UICollectionViewDelegateFlowLayout {
 
 // MARK: - RecentWatchViewProtocol
 extension RecentWatchViewController: RecentWatchViewProtocol {
+  func showCategories(_ categories: [String]) {
+    self.categories = categories
     
+    DispatchQueue.main.async {
+      self.categoryCollectionView.reloadData()
+      self.selectCategoryIfNeeded()
+    }
+  }
+  
+  func reloadCollectionView() {
+    moviesCollectionView.reloadData()
+  }
+  
+  func showMovies(_ movies: [Movie]) {
+    self.displayedMovies = movies
+    DispatchQueue.main.async {
+      self.moviesCollectionView.reloadData()
+    }
+  }
+  
+  func navigateToMovieDetail(movieId: Int) {
+      let detailVC = MovieDetailViewController(movieId: movieId)
+      navigationController?.pushViewController(detailVC, animated: true)
+  }
 }

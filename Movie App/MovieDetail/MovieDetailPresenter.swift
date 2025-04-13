@@ -10,13 +10,14 @@ import Foundation
 protocol MovieDetailPresenterProtocol: AnyObject {
     var view: MovieDetailViewProtocol? { get set }
     func viewDidLoad()
-    func watchNowButtonTapped()
     func getActorsCount() -> Int
     func getActor(at index: Int) -> Person?
     func getTrailerURL() -> URL?
-
+    
     func toggleLike()
     func isMovieLiked() -> Bool
+    func markMovieAsWatched()
+    func checkLikeStatus()
 }
 
 final class MovieDetailPresenter: MovieDetailPresenterProtocol {
@@ -39,10 +40,6 @@ final class MovieDetailPresenter: MovieDetailPresenterProtocol {
     
     func viewDidLoad() {
         loadMovieDetails()
-    }
-    
-    func watchNowButtonTapped() {
-        print("Watch now tapped for movie: \(movie?.name ?? "")")
     }
     
     func getActorsCount() -> Int {
@@ -85,13 +82,21 @@ final class MovieDetailPresenter: MovieDetailPresenterProtocol {
     }
     
     func toggleLike() {
-        guard let movie = movie else { return }
+        guard let movie else { return }
         CoreDataManager.shared.toggleLike(movie: movie)
-        view?.updateLikeButton()
+        checkLikeStatus()
     }
     
     func isMovieLiked() -> Bool {
-        guard let movie = movie else { return false }
-        return CoreDataManager.shared.getLikedMovies().contains { $0.id == Int32(movie.id) }
+        return CoreDataManager.shared.containsMovie(withId: movieId)
+    }
+    
+    func markMovieAsWatched() {
+        guard let movie = movie else { return }
+        CoreDataManager.shared.markAsWatched(movie: movie)
+    }
+    
+    func checkLikeStatus() {
+        view?.updateLikeButton()
     }
 }
