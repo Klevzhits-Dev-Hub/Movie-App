@@ -18,6 +18,7 @@ extension UITextField {
         textField.layer.borderColor = #colorLiteral(red: 0.3179999888, green: 0.3059999943, blue: 0.7139999866, alpha: 1)
         textField.placeholder = text
         textField.textColor = .blackText
+        textField.backgroundColor = .systemBackground
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }
@@ -56,6 +57,7 @@ extension UITextField {
         textField.layer.cornerRadius = 25
         textField.placeholder = text
         textField.textColor = .grayText
+        textField.backgroundColor = .systemBackground
         
         textField.heightAnchor.constraint(equalToConstant: 52).isActive = true
         //        textField.widthAnchor.constraint(equalToConstant: 327).isActive = true
@@ -65,7 +67,7 @@ extension UITextField {
     }
     static  func makePasswordTextField(withPlaceholder text: String) -> UITextField {
         let textField = UITextField()
-        textField.backgroundColor = .authTextField
+        textField.backgroundColor = .systemBackground
         textField.layer.cornerRadius = 25
         textField.placeholder = text
         textField.textColor = .grayText
