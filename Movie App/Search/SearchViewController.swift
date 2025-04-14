@@ -8,11 +8,13 @@
 import UIKit
 
 protocol SearchViewProtocol: AnyObject {
-  func showCategories(_ categories: [String])
-  func showMovies(_ movies: [Movie])
-  func dismissKeyboardSearch()
-  func showFilterSheet()
-  func navigateToMovieDetail(movieId: Int)
+    func showCategories(_ categories: [String])
+    func showMovies(_ movies: [Movie])
+    func dismissKeyboardSearch()
+    func showFilterSheet()
+    func navigateToMovieDetail(movieId: Int)
+    func showSearchResults(_ movies: [Movie])
+    func showEmptySearch()
 }
 
 class SearchViewController: UIViewController {
@@ -113,6 +115,7 @@ class SearchViewController: UIViewController {
   private var categories: [String] = []
   private var displayedMovies = [Movie]()
   private let presenter: SearchPresenterProtocol
+    private var selectedCategory: String = "All"
   
     //MARK: - Life cycle
     override func viewDidLoad() {
@@ -276,7 +279,7 @@ extension SearchViewController: UICollectionViewDelegateFlowLayout {
             
             return CGSize(width: cellWidth, height: 34)
         } else {
-            let width = (UIScreen.main.bounds.size.width)
+            let width = max(UIScreen.main.bounds.size.width - 44, 1)
             return CGSize(width: width, height: 160)
         }
     }
@@ -284,14 +287,40 @@ extension SearchViewController: UICollectionViewDelegateFlowLayout {
 
 //MARK: - UITextFieldDelegate
 extension SearchViewController: UITextFieldDelegate {
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentText = textField.text ?? ""
+        guard let stringRange = Range(range, in: currentText) else { return false }
+        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+        
+        if updatedText.isEmpty {
+            presenter.categoryTapped(category: selectedCategory)
+        } else {
+            presenter.searchMovies(query: updatedText)
+        }
+        
+        return true
+    }
+    
+    func textFieldShouldClear(_ textField: UITextField) -> Bool {
+        presenter.categoryTapped(category: selectedCategory)
+        return true
+    }
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
     }
 }
-
 //MARK: - WishlistViewProtocol
 extension SearchViewController: SearchViewProtocol {
+    func showSearchResults(_ movies: [Movie]) {
+            self.displayedMovies = movies
+            moviesCollectionView.reloadData()
+        }
+        
+        func showEmptySearch() {
+            self.displayedMovies = []
+            moviesCollectionView.reloadData()
+        }
   func dismissKeyboardSearch() {
     searchTextField.resignFirstResponder()
   }
@@ -309,12 +338,12 @@ extension SearchViewController: SearchViewProtocol {
     }
   }
   
-  func showMovies(_ movies: [Movie]) {
-      self.displayedMovies = movies
-    DispatchQueue.main.async {
+    func showMovies(_ movies: [Movie]) {
+        DispatchQueue.main.async {
+            self.displayedMovies = movies
             self.moviesCollectionView.reloadData()
+        }
     }
-  }
   
   func navigateToMovieDetail(movieId: Int) {
       let detailVC = MovieDetailViewController(movieId: movieId)
