@@ -102,12 +102,12 @@ class OnboardingPageViewController: UIViewController {
             containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -40),
-            containerView.heightAnchor.constraint(equalToConstant: 260),
+            containerView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.4),
             
+            imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 40),
             imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            imageView.bottomAnchor.constraint(equalTo: containerView.topAnchor, constant: 40),
-            imageView.widthAnchor.constraint(equalToConstant: 240),
-            imageView.heightAnchor.constraint(equalToConstant: 240),
+            imageView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
+            imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor),
             
             titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 30),
             titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
@@ -117,7 +117,7 @@ class OnboardingPageViewController: UIViewController {
             descriptionLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
             descriptionLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
             
-            actionButton.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 30),
+            actionButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -30),
             actionButton.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
             actionButton.widthAnchor.constraint(equalToConstant: 200),
             actionButton.heightAnchor.constraint(equalToConstant: 50)

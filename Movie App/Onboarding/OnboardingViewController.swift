@@ -44,25 +44,25 @@ class OnboardingViewController: UIViewController {
     private func setupPages() {
         let firstPage = OnboardingPageViewController(
             image: UIImage(named: "onboarding1") ?? UIImage(),
-            title: "Watch your favorite movie easily",
-            description: "Semper in cursus magna et eu varius nunc adipiscing. Elementum justo, laoreet id sem .",
-            buttonTitle: "Continue",
+            title: "Откройте мир кино",
+            description: "Находите новые фильмы, сохраняйте в избранное и создайте свою персональную коллекцию",
+            buttonTitle: "Далее",
             isLastPage: false
         )
         
         let secondPage = OnboardingPageViewController(
             image: UIImage(named: "onboarding2") ?? UIImage(),
-            title: "Watch your favorite movie easily",
-            description: "Semper in cursus magna et eu varius nunc adipiscing. Elementum justo, laoreet id sem .",
-            buttonTitle: "Continue",
+            title: "Персональные рекомендации",
+            description: "Получайте подборки фильмов на основе ваших предпочтений и просмотров",
+            buttonTitle: "Далее",
             isLastPage: false
         )
         
         let thirdPage = OnboardingPageViewController(
             image: UIImage(named: "onboarding3") ?? UIImage(),
-            title: "Watch your favorite movie easily",
-            description: "Semper in cursus magna et eu varius nunc adipiscing. Elementum justo, laoreet id sem .",
-            buttonTitle: "Start",
+            title: "Смотрите где угодно",
+            description: "Сохраняйте контент для оффлайн-просмотра и наслаждайтесь без интернета",
+            buttonTitle: "Начать",
             isLastPage: true
         )
         

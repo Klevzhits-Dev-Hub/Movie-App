@@ -257,8 +257,8 @@ final class MovieDetailViewController: UIViewController {
     }
     
     @objc private func watchNowButtonTapped() {
+        presenter.markMovieAsWatched()
         guard let url = presenter.getTrailerURL() else {
-            showNoTrailerAlert()
             return
         }
         
