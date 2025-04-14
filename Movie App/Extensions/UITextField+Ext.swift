@@ -22,30 +22,33 @@ extension UITextField {
         return textField
     }
     
-    static  func makeTextFieldWithCalendar(withPlaceholder text: String) -> UITextField {
+    static  func makeTextFieldWithCalendar(withPlaceholder text: String, actionDate: Selector, action: Selector, target: Any) -> UITextField {
         let textField = makeTextField(withPlaceholder: text)
         
         let calendarButton = UIButton(type: .system)
-        calendarButton.setImage(#imageLiteral(resourceName: "сalendar"), for: .normal)
+        calendarButton.setImage(#imageLiteral(resourceName: "calendar"), for: .normal)
         calendarButton.tintColor = #colorLiteral(red: 0.3179999888, green: 0.3059999943, blue: 0.7139999866, alpha: 1)
         calendarButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: -30, bottom: 0, right: 0)
-        calendarButton.translatesAutoresizingMaskIntoConstraints = true
+        calendarButton.translatesAutoresizingMaskIntoConstraints = false
         textField.rightView = calendarButton
         textField.rightViewMode = .always
         textField.translatesAutoresizingMaskIntoConstraints = false
         
         let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
-        datePicker.preferredDatePickerStyle = .wheels
+        if #available(iOS 13.4, *) {
+            datePicker.preferredDatePickerStyle = .wheels
+        }
+        textField.inputView = datePicker
         
-        //            datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
-        //            textField.inputView = datePicker
-        //
-        //            let toolBar = UIToolbar().toolBarPicker(#selector(doneButtonPressed))
-        //            textField.inputAccessoryView = toolBar
+        let toolBar = UIToolbar().toolbarPicker(action)
+        textField.inputAccessoryView = toolBar
+        
+        calendarButton.addTarget(target, action: #selector(ProfileViewController.showDatePicker(_:)), for: .touchUpInside)
         
         return textField
     }
+    
     
     static  func makeAuthTextField(withPlaceholder text: String) -> UITextField {
         let textField = UITextField()
@@ -55,7 +58,7 @@ extension UITextField {
         textField.textColor = .grayText
         
         textField.heightAnchor.constraint(equalToConstant: 52).isActive = true
-//        textField.widthAnchor.constraint(equalToConstant: 327).isActive = true
+        //        textField.widthAnchor.constraint(equalToConstant: 327).isActive = true
         
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
@@ -68,7 +71,7 @@ extension UITextField {
         textField.textColor = .grayText
         
         textField.heightAnchor.constraint(equalToConstant: 52).isActive = true
-//        textField.widthAnchor.constraint(equalToConstant: 327).isActive = true
+        //        textField.widthAnchor.constraint(equalToConstant: 327).isActive = true
         
         textField.isUserInteractionEnabled = true
         textField.isSecureTextEntry = true
@@ -86,7 +89,7 @@ extension UITextField {
         iconContainerView.addSubview(showPasswordButton)
         iconContainerView.bringSubviewToFront(showPasswordButton)
         showPasswordButton.addTarget(textField, action: #selector(UITextField.togglePasswordVisibility(_:)), for: .touchUpInside)
-
+        
         textField.rightView = iconContainerView
         textField.rightViewMode = .always
         
@@ -102,3 +105,17 @@ extension UITextField {
         sender.setImage(buttonImage, for: .normal)
     }
 }
+
+private extension UIToolbar {
+    func toolbarPicker(_ target: Selector) -> UIToolbar {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        
+        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: target)
+        let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        
+        toolbar.setItems([flexibleSpace, doneButton], animated: false)
+        return toolbar
+    }
+}
+
