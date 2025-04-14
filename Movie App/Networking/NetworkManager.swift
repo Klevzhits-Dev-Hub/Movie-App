@@ -68,6 +68,31 @@ final class NetworkManager {
         performRequest(urlString: urlString, completion: completion)
     }
     
+    func fetchSearchMovies(
+            query: String,
+            page: Int = 1,
+            limit: Int = 20,
+            completion: @escaping (Result<MovieResponse, Error>) -> Void
+        ) {
+            var urlComponents = URLComponents(string: "\(baseURL)movie/search")
+            
+            let queryItems = [
+                URLQueryItem(name: "query", value: query),
+                URLQueryItem(name: "page", value: "\(page)"),
+                URLQueryItem(name: "limit", value: "\(limit)"),
+                URLQueryItem(name: "isStrict", value: "false")
+            ]
+            
+            urlComponents?.queryItems = queryItems
+            
+            guard let urlString = urlComponents?.url?.absoluteString else {
+                completion(.failure(NetworkError.invalidURL))
+                return
+            }
+            
+            performRequest(urlString: urlString, completion: completion)
+        }
+    
     private func performRequest<T: Codable>(urlString: String, completion: @escaping (Result<T, Error>) -> Void) {
         guard let url = URL(string: urlString) else {
             completion(.failure(NetworkError.invalidURL))
@@ -123,7 +148,7 @@ final class NetworkManager {
         }.resume()
     }
     
-    enum NetworkError: Error, LocalizedError {
+    enum NetworkError: Error, LocalizedError, Equatable {
         case invalidURL
         case noData
         case noInternetConnection
@@ -132,7 +157,7 @@ final class NetworkManager {
         case serverError
         case unauthorized
         case unknown
-        
+
         var errorDescription: String? {
             switch self {
             case .invalidURL:

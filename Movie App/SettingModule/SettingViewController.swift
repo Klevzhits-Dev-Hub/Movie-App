@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 protocol SettingViewProtocol: AnyObject {
     func navigateToProfile()
@@ -198,6 +199,12 @@ final class SettingViewController: UIViewController {
             guard let self = self else {return}
             DispatchQueue.main.async {
                 self.profileNameLabel.text = username ?? "Алёша"
+            }
+        }
+        
+        if let email = Auth.auth().currentUser?.email {
+            DispatchQueue.main.async {
+                self.nickNameLabel.text = email
             }
         }
     }

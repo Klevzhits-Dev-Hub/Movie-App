@@ -200,11 +200,21 @@ final class LoginViewController: UIViewController {
     func signInWithGoogle(idToken: String, accessToken: String ) {
         let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
         
-        Auth.auth().signIn(with: credential) { result, error in
-            guard let _ = result, error == nil else {return}
+        Auth.auth().signIn(with: credential) { [weak self] result, error in
+            guard let self = self, let _ = result, error == nil else {return}
             
-            if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate {
-                sceneDelegate.checkAuthentication()
+            AuthService.shared.fetchGoogleUserProfileData { profileData, error in
+                if let error = error {
+                    print("Ошибка при получении данных профиля: \(error)")
+                }
+                
+                if let profileData = profileData {
+                    print("Получены данные профиля: Имя - \(profileData.firstName ?? "не указано"), Фамилия - \(profileData.lastName ?? "не указана"), Email - \(profileData.email ?? "не указан")")
+                }
+                
+                if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate {
+                    sceneDelegate.checkAuthentication()
+                }
             }
         }
     }
