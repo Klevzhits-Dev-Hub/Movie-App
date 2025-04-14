@@ -8,15 +8,22 @@
 import UIKit
 import FirebaseAuth
 
+
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        window = UIWindow(window
-        checkAuthentication()
+        window = UIWindow(windowScene: windowScene)
+        
+        if !OnboardingManager.shared.hasSeenOnboarding() {
+            showOnboarding()
+        } else {
+            checkAuthentication()
+        }
     }
     
+    // Публичный метод для проверки аутентификации и перехода на соответствующий экран
     func checkAuthentication() {
         if Auth.auth().currentUser != nil {
             setupMainInterface()
@@ -26,6 +33,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             window?.rootViewController = navigationController
             window?.makeKeyAndVisible()
         }
+    }
+    
+    private func showOnboarding() {
+        let onboardingVC = OnboardingViewController()
+        onboardingVC.modalPresentationStyle = .fullScreen
+        window?.rootViewController = onboardingVC
+        window?.makeKeyAndVisible()
     }
     
     private func setupMainInterface() {
