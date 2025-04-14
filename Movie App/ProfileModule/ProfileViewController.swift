@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 protocol ProfileViewProtocol: AnyObject {
     func backButtonTapped()
@@ -23,6 +24,10 @@ final class ProfileViewController: UIViewController {
         formatter.timeStyle = .none
         return formatter
     }()
+    
+    private var isGoogleUser: Bool {
+        return Auth.auth().currentUser?.providerData.contains(where: { $0.providerID == "google.com" }) ?? false
+    }
     
     private lazy var titleLabel: UILabel = {
         let element = UILabel()
@@ -88,10 +93,22 @@ final class ProfileViewController: UIViewController {
     private lazy var locationLabel = UILabel.makeCustomLabel(text: "Location")
     
     //MARK: - TextFields
-    private lazy var firstNameTextField = UITextField.makeTextField(withPlaceholder: "Andy")
-    private lazy var lastNameTextField = UITextField.makeTextField(withPlaceholder: "Lexsian")
+    private lazy var firstNameTextField: UITextField = {
+        let textField = UITextField.makeTextField(withPlaceholder: "Andy")
+        textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        return textField
+    }()
+    private lazy var lastNameTextField: UITextField = {
+        let textField = UITextField.makeTextField(withPlaceholder: "Lexsian")
+        textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        return textField
+    }()
     private lazy var emailTextField = UITextField.makeTextField(withPlaceholder: "Andylexian22@gmail.com")
-    private lazy var dateOfBirthTextField = UITextField.makeTextFieldWithCalendar(withPlaceholder: "24 february 1996", actionDate: #selector(datePickerValueChanged(_:)), action: #selector(doneButtonPressed), target: self)
+    private lazy var dateOfBirthTextField: UITextField = {
+        let textField = UITextField.makeTextFieldWithCalendar(withPlaceholder: "24 february 1996", actionDate: #selector(datePickerValueChanged(_:)), action: #selector(doneButtonPressed), target: self)
+        textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        return textField
+    }()
     private lazy var locationTextView: UITextView = {
         let textView = UITextView()
         textView.backgroundColor = .clear
@@ -124,16 +141,35 @@ final class ProfileViewController: UIViewController {
         button.layer.cornerRadius = 24
         button.backgroundColor = .grayButtonProfileScreen
         button.addTarget(self, action: #selector(saveButtonPressed), for: .touchUpInside)
+        button.isEnabled = false
         button.translatesAutoresizingMaskIntoConstraints = false
         
         return button
     }()
+    
+    private var hasChanges: Bool = false {
+        didSet {
+            updateSaveButtonState()
+        }
+    }
+    
+    private var initialProfileData: UserProfileData?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
         setupConstraints()
         navigationItem.titleView = titleLabel
+        
+        if isGoogleUser {
+            loadGoogleProfileData()
+        } else {
+            loadUserProfileData()
+        }
+        
+        // Добавляем обработчики для кнопок выбора пола
+        maleButton.addTarget(self, action: #selector(genderButtonTapped), for: .touchUpInside)
+        femaleButton.addTarget(self, action: #selector(genderButtonTapped), for: .touchUpInside)
     }
     
     init(presenter: ProfilePresenterProtocol) {
@@ -159,7 +195,29 @@ final class ProfileViewController: UIViewController {
         present(imagePickerController, animated: true, completion: nil)
     }
     @objc private func saveButtonPressed() {
-        presenter.saveButtonPressed()
+//        presenter.saveButtonPressed()
+        saveTapped()
+        hasChanges = false
+    }
+    
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        hasChanges = true
+    }
+    
+    @objc private func genderButtonTapped(_ sender: UIButton) {
+        hasChanges = true
+    }
+    
+    private func updateSaveButtonState() {
+        if hasChanges {
+            saveButton.isEnabled = true
+            saveButton.backgroundColor = .selected
+            saveButton.setTitleColor(.white, for: .normal)
+        } else {
+            saveButton.isEnabled = false
+            saveButton.backgroundColor = .grayButtonProfileScreen
+            saveButton.setTitleColor(.grayText, for: .normal)
+        }
     }
     
     @objc private func backButtonPressed() {
@@ -167,6 +225,7 @@ final class ProfileViewController: UIViewController {
     }
     @objc func datePickerValueChanged(_ sender: UIDatePicker) {
         dateOfBirthTextField.text = dateFormatter.string(from: sender.date)
+        hasChanges = true
     }
     
     @objc func doneButtonPressed() {
@@ -332,10 +391,144 @@ extension ProfileViewController: ProfileViewProtocol {
     
     func saveTapped() {
         print("save button tapped!")
+        
+        let firstName = firstNameTextField.text
+        let lastName = lastNameTextField.text
+        let birthDate = dateOfBirthTextField.text
+        
+        var gender: String? = nil
+        if maleButton.isSelected {
+            gender = "male"
+        } else if femaleButton.isSelected {
+            gender = "female"
+        }
+        
+        // Показываем индикатор загрузки
+        let loadingAlert = UIAlertController(title: nil, message: "Сохранение...", preferredStyle: .alert)
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 5, width: 50, height: 50))
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.style = .medium
+        loadingIndicator.startAnimating()
+        loadingAlert.view.addSubview(loadingIndicator)
+        present(loadingAlert, animated: true, completion: nil)
+        
+        AuthService.shared.updateUserProfile(firstName: firstName, lastName: lastName, birthDate: birthDate, gender: gender) { [weak self] success, error in
+            guard let self = self else { return }
+            
+            // Скрываем индикатор загрузки
+            DispatchQueue.main.async {
+                self.dismiss(animated: true) {
+                    if success {
+                        // Показываем сообщение об успешном сохранении
+                        let successAlert = UIAlertController(title: "Успех", message: "Профиль успешно обновлен", preferredStyle: .alert)
+                        successAlert.addAction(UIAlertAction(title: "OK", style: .default))
+                        self.present(successAlert, animated: true)
+                        print("Профиль успешно обновлен")
+                        
+                        // Обновляем начальные данные профиля
+                        self.initialProfileData = UserProfileData(
+                            firstName: firstName,
+                            lastName: lastName,
+                            email: self.emailTextField.text,
+                            birthDate: birthDate,
+                            gender: gender
+                        )
+                        
+                        // Сбрасываем флаг изменений
+                        self.hasChanges = false
+                    } else if let error = error {
+                        // Показываем сообщение об ошибке
+                        let errorAlert = UIAlertController(title: "Ошибка", message: "Не удалось обновить профиль: \(error.localizedDescription)", preferredStyle: .alert)
+                        errorAlert.addAction(UIAlertAction(title: "OK", style: .default))
+                        self.present(errorAlert, animated: true)
+                        print("Ошибка при обновлении профиля: \(error)")
+                    }
+                }
+            }
+        }
     }
     
     func backButtonTapped() {
         navigationController?.popViewController(animated: true)
+    }
+}
+
+// MARK: - Profile Data Loading
+extension ProfileViewController {
+    private func loadGoogleProfileData() {
+        AuthService.shared.fetchGoogleUserProfileData { [weak self] profileData, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("Ошибка при загрузке данных профиля из Google: \(error)")
+                return
+            }
+            
+            if let profileData = profileData {
+                DispatchQueue.main.async {
+                    if let firstName = profileData.firstName {
+                        self.firstNameTextField.text = firstName
+                    }
+                    
+                    if let lastName = profileData.lastName {
+                        self.lastNameTextField.text = lastName
+                    }
+                    
+                    if let email = profileData.email {
+                        self.emailTextField.text = email
+                        self.emailTextField.isEnabled = false
+                    }
+                }
+            }
+        }
+    }
+    
+    private func loadUserProfileData() {
+        AuthService.shared.fetchUserProfileData { [weak self] profileData, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("Ошибка при загрузке данных профиля: \(error)")
+                return
+            }
+            
+            if let profileData = profileData {
+                self.initialProfileData = profileData
+                
+                DispatchQueue.main.async {
+                    if let firstName = profileData.firstName {
+                        self.firstNameTextField.text = firstName
+                    }
+                    
+                    if let lastName = profileData.lastName {
+                        self.lastNameTextField.text = lastName
+                    }
+                    
+                    if let email = profileData.email {
+                        self.emailTextField.text = email
+                    }
+                    
+                    if let birthDate = profileData.birthDate {
+                        self.dateOfBirthTextField.text = birthDate
+                    }
+                    
+                    if let gender = profileData.gender {
+                        if gender.lowercased() == "male" {
+                            self.maleButton.isSelected = true
+                            self.femaleButton.isSelected = false
+                            self.presenter.genderButtonTapped(type: .male)
+                        } else if gender.lowercased() == "female" {
+                            self.femaleButton.isSelected = true
+                            self.maleButton.isSelected = false
+                            self.presenter.genderButtonTapped(type: .female)
+                        }
+                    }
+                    
+                    // Сбрасываем флаг изменений после загрузки данных
+                    self.hasChanges = false
+                }
+            }
+        }
     }
 }
 
