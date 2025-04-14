@@ -17,7 +17,7 @@ extension UITextField {
         textField.layer.cornerRadius = 24
         textField.layer.borderColor = #colorLiteral(red: 0.3179999888, green: 0.3059999943, blue: 0.7139999866, alpha: 1)
         textField.placeholder = text
-        textField.textColor = .black
+        textField.textColor = .blackText
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }

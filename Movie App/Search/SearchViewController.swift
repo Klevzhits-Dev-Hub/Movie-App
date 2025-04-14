@@ -23,7 +23,7 @@ class SearchViewController: UIViewController {
         label.text = "Search"
         label.font =  UIFont(name: Fonts.PlusJakartaSans.extraBold.rawValue, size: 18)
         label.textAlignment = .center
-        label.textColor = .black
+        label.textColor = .blackText
         
         return label
     }()
@@ -44,15 +44,15 @@ class SearchViewController: UIViewController {
         
         textField.placeholder = "Search"
         textField.font = UIFont.systemFont(ofSize: 16)
-        textField.backgroundColor = .white
-        textField.textColor = .black
+        textField.backgroundColor = .systemBackground
+        textField.textColor = .blackText
         textField.clearButtonMode = .whileEditing
         textField.borderStyle = .none
         textField.layer.cornerRadius = 22
         textField.layer.masksToBounds = true
         
         let imageView = UIImageView(image: UIImage(systemName: "magnifyingglass"))
-        imageView.tintColor = .darkGray
+        imageView.tintColor = .blackText
         imageView.contentMode = .scaleAspectFit
         imageView.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
         
@@ -72,7 +72,7 @@ class SearchViewController: UIViewController {
         let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
         let image = UIImage(systemName: "slider.horizontal.3", withConfiguration: config)
         button.setImage(image, for: .normal)
-        button.tintColor = .darkGray
+        button.tintColor = .blackText
         
         return button
     }()

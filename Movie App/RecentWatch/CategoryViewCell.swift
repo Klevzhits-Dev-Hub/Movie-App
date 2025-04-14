@@ -29,8 +29,8 @@ class CategoryViewCell: UICollectionViewCell {
   
   override var isSelected: Bool {
       didSet {        
-        categoryLabel.backgroundColor = isSelected ? .selected : .white
-        categoryLabel.textColor = isSelected ? .white : .grayText
+        categoryLabel.backgroundColor = isSelected ? .selected : .systemBackground
+          categoryLabel.textColor = isSelected ? .white : .grayText
         categoryLabel.layer.borderColor = isSelected ? UIColor.selected.cgColor : UIColor.grayText.cgColor
       }
   }

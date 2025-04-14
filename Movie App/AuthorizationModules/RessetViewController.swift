@@ -14,7 +14,7 @@ final class RessetViewController: UIViewController {
         let element = UILabel()
         element.text = "Forgot your password?"
         element.font = UIFont.systemFont(ofSize: 24, weight: .bold)
-        element.textColor = .black
+        element.textColor = .blackText
         element.textAlignment = .center
         element.translatesAutoresizingMaskIntoConstraints = false
         return element

@@ -28,7 +28,7 @@ final class ProfileViewController: UIViewController {
         let element = UILabel()
         element.text = "Profile"
         element.font = UIFont(name: Fonts.PlusJakartaSans.bold.rawValue, size: 18)
-        element.textColor = .black
+        element.textColor = .blackText
         element.textAlignment = .center
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
@@ -122,7 +122,7 @@ final class ProfileViewController: UIViewController {
         button.titleLabel?.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
         button.setTitleColor( .grayText, for: .normal)
         button.layer.cornerRadius = 24
-        button.backgroundColor = .grayButtonProfileScreen
+        button.backgroundColor = .saveButtonProfile
         button.addTarget(self, action: #selector(saveButtonPressed), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         

@@ -23,6 +23,7 @@ class WishlistViewCell: UICollectionViewCell {
         let label = UILabel()
         
         label.text = "Luck"
+        label.textColor = .blackText
         label.font = UIFont(name: Fonts.PlusJakartaSans.extraBold.rawValue, size: 18)
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping

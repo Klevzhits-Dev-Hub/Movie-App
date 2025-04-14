@@ -39,6 +39,7 @@ final class HomeViewController: UICollectionViewController{
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .systemBackground
         setupNavigationBar()
         setupLargeNavBar()
         setupCollectionVIew()
@@ -345,8 +346,8 @@ extension HomeViewController {
 extension HomeViewController {
     private func setupNavigationBar() {
         navigationController?.navigationBar.prefersLargeTitles = false
-        navigationController?.navigationBar.barTintColor = .black
-        navigationController?.navigationBar.tintColor = .white
+//        navigationController?.navigationBar.barTintColor = .black
+//        navigationController?.navigationBar.tintColor = .white
         
         let titleView = UIView()
         titleView.translatesAutoresizingMaskIntoConstraints = false
@@ -365,13 +366,13 @@ extension HomeViewController {
         let label = UILabel()
         label.text = "Hi, Andy"
         label.font = UIFont.boldSystemFont(ofSize: 22)
-        label.textColor = .black
+        label.textColor = .blackText
         label.translatesAutoresizingMaskIntoConstraints = false
         
         let description = UILabel()
         description.text = "only streaming movie lovers"
         description.font = UIFont.systemFont(ofSize: 16)
-        description.textColor = .systemGray
+        description.textColor = .blackText
         description.translatesAutoresizingMaskIntoConstraints = false
         
         let textStackView = UIStackView(arrangedSubviews: [label, description])
@@ -402,7 +403,7 @@ extension HomeViewController {
     private func setupLargeNavBar() {
         let appearance = UINavigationBarAppearance()
         appearance.configureWithTransparentBackground()
-        appearance.backgroundColor = .white
+        appearance.backgroundColor = .systemBackground
         appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.black]
 
         navigationController?.navigationBar.standardAppearance = appearance
@@ -411,7 +412,7 @@ extension HomeViewController {
         navigationItem.largeTitleDisplayMode = .always
 
         let customNavBarBackground = UIView()
-        customNavBarBackground.backgroundColor = .white
+        customNavBarBackground.backgroundColor = .systemBackground
         customNavBarBackground.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(customNavBarBackground)
 

@@ -27,7 +27,7 @@ extension UIButton {
     
     static func makeGoogleButton(title: String,target: Any?, action: Selector) -> UIButton {
         let button = UIButton()
-        button.backgroundColor = .white
+        button.backgroundColor = .systemBackground
         button.layer.cornerRadius = 25
         button.clipsToBounds = false
         button.layer.borderColor = UIColor.black.cgColor
@@ -52,7 +52,7 @@ extension UIButton {
         let titleLabel = UILabel()
         titleLabel.text = title
         titleLabel.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
-        titleLabel.textColor = .black
+        titleLabel.textColor = .blackText
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
         containerStackView.addArrangedSubview(imageView)

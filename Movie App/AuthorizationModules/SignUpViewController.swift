@@ -13,7 +13,7 @@ final class SignUpViewController: UIViewController {
         let element = UILabel()
         element.text = "Sign Up"
         element.font = UIFont.systemFont(ofSize: 24, weight: .bold)
-        element.textColor = .black
+        element.textColor = .blackText
         element.textAlignment = .center
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
@@ -64,7 +64,7 @@ final class SignUpViewController: UIViewController {
         let label = UILabel()
         label.text = "Already have an account?"
         label.font = UIFont.systemFont(ofSize: 15)
-        label.textColor = .black
+        label.textColor = .blackText
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()

@@ -43,6 +43,7 @@ class ActorsCollectionViewCell: UICollectionViewCell {
             name: Fonts.PlusJakartaSans.semiBold.rawValue,
             size: 14
         )
+        element.textColor = .blackText
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
