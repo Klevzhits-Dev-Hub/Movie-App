@@ -14,12 +14,11 @@ Welcome to **Movie App**
 **Movie App** is an application for viewing movie information, ratings, genres, and cast members. The app uses an external API to fetch up-to-date movie data and allows users to switch between light and dark themes.
 
 ## Key Features  
-- **Wide Product Range**: Discover thousands of products across categories like fashion, electronics, home essentials, and more.  
-- **Personalized Recommendations**: Get tailored suggestions based on your preferences and browsing history.  
-- **Secure Payments**: Shop safely with multiple payment options, including credit/debit cards, digital wallets, and more.  
-- **Fast Delivery**: Enjoy quick and reliable delivery services right to your doorstep.  
-- **Easy Returns**: Hassle-free return policy for a stress-free shopping experience.  
-- **Exclusive Deals**: Access special discounts, flash sales, and member-only offers.  
+- **Search Movies**: Search for movies by title.
+- **Detailed Movie Information**: View detailed information, including description, genres, cast, and ratings.
+- **Save Favorite Movies**: Add movies to a favorites list and view it.
+- **Animated Launch Screen**: An animated screen when launching the app.
+- **Light and Dark Themes**: Switch between light and dark themes.
 
 
 ## Technical Details  
