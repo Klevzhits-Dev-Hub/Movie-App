@@ -29,6 +29,7 @@ final class RessetViewController: UIViewController {
         let imageBack = UIImage(systemName: "arrow.backward")?.withTintColor(.label, renderingMode: .alwaysOriginal)
         let backButton = UIBarButtonItem(image: imageBack, style: .plain, target: self, action: #selector(didTapBackButton))
         backButton.tintColor = .blackText
+        view.backgroundColor = .systemBackground
         navigationItem.leftBarButtonItem = backButton
         navigationItem.titleView = titleLabel
         

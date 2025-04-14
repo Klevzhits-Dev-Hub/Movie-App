@@ -132,7 +132,7 @@ final class LoginViewController: UIViewController {
         
         navigationItem.titleView = titleLabel
         setupUI()
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         loadRememberMeState()
     }
     
