@@ -14,7 +14,7 @@ final class FilterSheetViewController: UIViewController {
         
         let image = UIImage(systemName: "xmark")?.withConfiguration(UIImage.SymbolConfiguration( weight: .bold))
         button.setImage(image, for: .normal)
-        button.tintColor = .black
+        button.tintColor = .blackText
         button.addTarget(self, action: #selector(closeFilter), for: .touchUpInside)
         
         return button
@@ -25,7 +25,7 @@ final class FilterSheetViewController: UIViewController {
         
         label.text = "Filter"
         label.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 18)
-        label.textColor = .black
+        label.textColor = .blackText
         
         return label
     }()
@@ -45,7 +45,7 @@ final class FilterSheetViewController: UIViewController {
         
         label.text = "Categories"
         label.font = UIFont(name: Fonts.PlusJakartaSans.bold.rawValue, size: 16)
-        label.textColor = .black
+        label.textColor = .blackText
         
         return label
     }()
@@ -74,7 +74,7 @@ final class FilterSheetViewController: UIViewController {
         
         label.text = "Star Rating"
         label.font = UIFont(name: Fonts.PlusJakartaSans.bold.rawValue, size: 16)
-        label.textColor = .black
+        label.textColor = .blackText
         
         return label
     }()
@@ -95,7 +95,7 @@ final class FilterSheetViewController: UIViewController {
         let button = UIButton()
         
         button.setTitle("Apply Filters", for: .normal)
-        button.setTitleColor(.background, for: .normal)
+        button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont(name: Fonts.PlusJakartaSans.bold.rawValue, size: 14)
         button.backgroundColor = .selected
         button.layer.cornerRadius = 24
@@ -115,7 +115,7 @@ final class FilterSheetViewController: UIViewController {
     //MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         setupSheet()
         isModalInPresentation = true
         
@@ -126,7 +126,7 @@ final class FilterSheetViewController: UIViewController {
     
     //MARK: - Private Methods
     private func setupSheet() {
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         if let sheet = sheetPresentationController {
             sheet.detents = [.medium()]
             sheet.prefersGrabberVisible = false

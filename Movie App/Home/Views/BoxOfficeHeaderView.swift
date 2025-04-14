@@ -13,6 +13,7 @@ final class BoxOfficeHeaderView: UICollectionReusableView {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Box Office"
+        label.textColor = .blackText
         label.font = .boldSystemFont(ofSize: 18)
         return label
     }()

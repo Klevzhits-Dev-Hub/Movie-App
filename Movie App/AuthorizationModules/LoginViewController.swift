@@ -17,7 +17,7 @@ final class LoginViewController: UIViewController {
         let element = UILabel()
         element.text = "Login"
         element.font = UIFont.systemFont(ofSize: 24, weight: .bold)
-        element.textColor = .black
+        element.textColor = .blackText
         element.textAlignment = .center
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
@@ -31,7 +31,7 @@ final class LoginViewController: UIViewController {
     
     private let rememberLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .label
+        label.textColor = .blackText
         label.textAlignment = .center
         label.font = UIFont.systemFont(ofSize: 14)
         label.text = "Remember Me"
@@ -109,7 +109,7 @@ final class LoginViewController: UIViewController {
         let label = UILabel()
         label.text = "Don’t have an account?"
         label.font = UIFont.systemFont(ofSize: 15)
-        label.textColor = .black
+        label.textColor = .blackText
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()

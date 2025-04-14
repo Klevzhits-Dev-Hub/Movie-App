@@ -17,7 +17,7 @@ class EditAvatarViewController: UIViewController {
     
     private let containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         view.layer.cornerRadius = 16
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -27,6 +27,7 @@ class EditAvatarViewController: UIViewController {
         let label = UILabel()
         label.text = "Change your picture"
         label.font = UIFont.boldSystemFont(ofSize: 18)
+        label.textColor = .blackText
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -34,12 +35,12 @@ class EditAvatarViewController: UIViewController {
     
     private lazy var cameraButton: UIButton = {
         let button = UIButton(type: .system)
-        let image = UIImage(named: "camera")?.withRenderingMode(.alwaysOriginal)
+        let image = UIImage(named: "camera")?.withRenderingMode(.automatic)
         button.setImage(image, for: .normal)
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 160)
         button.setTitle("Take a photo", for: .normal)
         button.titleLabel?.font = UIFont(name: Fonts.PlusJakartaSans.bold.rawValue, size: 14)
-        button.setTitleColor(.black, for: .normal)
+        button.setTitleColor(.blackText, for: .normal)
         button.backgroundColor = .grayButtonProfileScreen
         button.layer.cornerRadius = 10
         button.addTarget(self, action: #selector(cameraButtonTapped), for: .touchUpInside)
@@ -49,12 +50,12 @@ class EditAvatarViewController: UIViewController {
     
     private lazy var photoLibraryButton: UIButton = {
         let button = UIButton(type: .system)
-        let image = UIImage(named: "file")?.withRenderingMode(.alwaysOriginal)
+        let image = UIImage(named: "file")?.withRenderingMode(.automatic)
         button.setImage(image, for: .normal)
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 100)
         button.setTitle("Choose from your file", for: .normal)
         button.titleLabel?.font = UIFont(name: Fonts.PlusJakartaSans.bold.rawValue, size: 14)
-        button.setTitleColor(.black, for: .normal)
+        button.setTitleColor(.blackText, for: .normal)
         button.layer.cornerRadius = 10
         button.backgroundColor = .grayButtonProfileScreen
         button.addTarget(self, action: #selector(photoLibraryButtonTapped), for: .touchUpInside)

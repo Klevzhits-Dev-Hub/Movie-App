@@ -15,6 +15,7 @@ class BoxOfficeMovieCell: UICollectionViewCell {
     let movieImageView: UIImageView = {
         let iv = UIImageView()
         iv.layer.cornerRadius = 15
+        iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
         iv.translatesAutoresizingMaskIntoConstraints = false
         return iv
@@ -24,7 +25,7 @@ class BoxOfficeMovieCell: UICollectionViewCell {
         let label = UILabel()
         label.text = "Name of the movie"
         label.numberOfLines = 0
-        label.textColor = .black
+        label.textColor = .blackText
         label.font = .boldSystemFont(ofSize: 20)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label

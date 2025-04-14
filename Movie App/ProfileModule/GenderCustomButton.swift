@@ -21,7 +21,7 @@ final class GenderCustomButton: UIButton {
     lazy var genderLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
-        label.textColor = .black
+        label.textColor = .blackText
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()

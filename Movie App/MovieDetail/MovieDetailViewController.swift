@@ -53,6 +53,8 @@ final class MovieDetailViewController: UIViewController {
     private lazy var movieNameLabel: UILabel = {
         let element = UILabel()
         element.text = "Movie Name"
+        element.numberOfLines = 0
+        element.textColor = .blackText
         element.font = UIFont(name: Fonts.PlusJakartaSans.bold.rawValue, size: 24)
         element.textAlignment = .center
         element.translatesAutoresizingMaskIntoConstraints = false
@@ -132,6 +134,7 @@ final class MovieDetailViewController: UIViewController {
     private lazy var actorLabel: UILabel = {
         let element = UILabel()
         element.text = "Cast and Crew"
+        element.textColor = .blackText
         element.font = UIFont(name: Fonts.PlusJakartaSans.semiBold.rawValue, size: 16)
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
@@ -171,7 +174,7 @@ final class MovieDetailViewController: UIViewController {
             UIColor(red: 254/255, green: 254/255, blue: 254/255, alpha: 1),
             for: .normal
         )
-        element.backgroundColor = UIColor(named: "SelectedColor")
+        element.backgroundColor = .selected
         element.layer.cornerRadius = 24
         element.addTarget(self, action: #selector(watchNowButtonTapped), for: .touchUpInside)
         element.translatesAutoresizingMaskIntoConstraints = false
@@ -197,7 +200,7 @@ final class MovieDetailViewController: UIViewController {
     // MARK: - Life Circle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(named: "BackgroundColor")
+        view.backgroundColor = .systemBackground
         presenter.viewDidLoad()
         setupViews()
         setupConstraints()

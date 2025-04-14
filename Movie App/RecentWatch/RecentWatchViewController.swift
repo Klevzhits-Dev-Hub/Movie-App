@@ -22,7 +22,7 @@ class RecentWatchViewController: UIViewController {
         label.text = "Recent Watch"
         label.font =  UIFont(name: Fonts.PlusJakartaSans.extraBold.rawValue, size: 18)
         label.textAlignment = .center
-        label.textColor = .black
+        label.textColor = .blackText
         
         return label
     }()
