@@ -117,7 +117,7 @@ class SearchViewController: UIViewController {
     //MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        OnboardingManager.shared.resetOnboardingStatus()
         filterButton.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside)
         
         searchTextField.delegate = self
