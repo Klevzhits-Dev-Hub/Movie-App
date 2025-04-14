@@ -107,7 +107,10 @@ final class FilterSheetViewController: UIViewController {
     //MARK: - Properties
     var categories: [String] = ["All", "Action", "Adventure", "Criminal", "Drama", "Mystery", "Fantasy", "Action", "Adventure", "Criminal", "Drama", "Mystery", "Fantasy","Action", "Adventure", "Criminal", "Drama", "Mystery", "Fantasy","Action", "Adventure", "Criminal", "Drama", "Mystery", "Fantasy","Action", "Adventure", "Criminal", "Drama", "Mystery", "Fantasy","Action", "Adventure", "Criminal", "Drama", "Mystery", "Fantasy","Action", "Adventure", "Criminal", "Drama", "Mystery", "Fantasy","Action", "Adventure", "Criminal", "Drama", "Mystery", "Fantasy","Action", "Adventure", "Criminal", "Drama", "Mystery", "Fantasy"]
     
+  
+  //MARK: - Properties  
     private var starButtons = [UIButton]()
+    private var selectedCategoryIndex: IndexPath?
     
     //MARK: - Life cycle
     override func viewDidLoad() {
@@ -238,7 +241,7 @@ final class FilterSheetViewController: UIViewController {
     
     @objc private func starButtonTapped(sender: UIButton) {
         starButtons.forEach { button in
-            button.layer.borderColor = UIColor.systemGray.cgColor
+          button.layer.borderColor = UIColor.grayText.cgColor
         }
         
         sender.layer.borderColor = UIColor.selected.cgColor
@@ -258,7 +261,9 @@ extension FilterSheetViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CategoryViewCell", for: indexPath) as! CategoryViewCell
-        cell.configure(for: categories[indexPath.row])
+      let category = categories[indexPath.item]
+        cell.configure(for: category)
+      
         return cell
     }
 }
